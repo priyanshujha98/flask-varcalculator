@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width,initial-scale=1" name="viewport">
+    <meta content="description" name="description">
+    <meta http-equiv="ScreenOrientation" content="autoRotate:disabled">
+    <meta name="google" content="notranslate" />
+
+    <!-- Disable tap highlight on IE -->
+    <meta name="msapplication-tap-highlight" content="no">
+
+    <link rel="apple-touch-icon" sizes="180x180" href="./static/assets/apple-icon-180x180.png">
+    <link href="./static/assets/favicon.png" rel="icon">
+
+    <title>Welcome to FX Risk App</title>
+
+    <link href="./static/frontend.css" rel="stylesheet">
+</head>
+
+<body class="main">
+    <div class="page-wrapper">
+        {% for each in rates %}
+        {{ each }}<br />
+        {% endfor %}
+    </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
+    <script type="text/javascript" src="./static/script.js"></script>
+</body>
+
+</html>

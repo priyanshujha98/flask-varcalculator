@@ -1,0 +1,103 @@
+.header{
+    display: flex;
+    justify-content: space-between;
+}
+
+a.img-icon{
+    text-align: center;
+    text-decoration: none;
+    color: white;
+}
+
+a.img-icon:hover, a.img-icon:focus, a.img-icon:visited{
+    text-decoration: none;
+}
+a.img-icon img{
+    display: block;
+    margin: 0 auto;
+}
+
+.navigation-wrapper{
+    display: flex;
+    justify-content: space-between;
+    padding: 0 30px;
+}
+
+.navigation-wrapper .icon-wrapper{
+    background: white;
+    padding: 5px;
+    width: 40px;
+    height: 30px;
+    margin: 0 auto;
+    border-radius: 5px;
+}
+
+.page-content{
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;    
+}
+
+.main-content{
+    background-color: #fff9f9;
+    border-top-left-radius: 50px;
+    border-top-right-radius: 50px;
+    padding: 50px 30px;
+}
+
+.step{
+    display: none;
+}
+
+.step.active{
+    display: block;
+}
+
+.navigation-wrapper .img-icon{
+    flex: 1 1 0px;
+}
+
+#exposure-table tbody tr{
+    border-bottom: 1px solid #af2318;
+}
+
+
+#exposure-table thead tr{
+    text-align: center;
+}
+
+.exposure-table{
+    margin:10px 0;
+}
+
+table select, table input{
+    border: none;
+}
+
+table input{
+    text-align: right;
+}
+.profile-section{
+    position: relative;
+}
+.profile-section img{
+    display: block;
+    margin: 0 auto 15px;
+}
+
+.profile-section .membership{
+    background-color: #188c25;
+    color: white;
+    position: absolute;
+    right: 30px;
+    border-radius: 5px;
+    padding: 6px 10px;
+    top: 0;
+}
+
+.previous-reports li{
+    display: flex;
+    justify-content: space-between;
+    margin: 5px 0;
+}
