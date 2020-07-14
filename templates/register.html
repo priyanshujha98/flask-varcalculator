@@ -1,141 +1,182 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends 'base_page.html' %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta content="IE=edge" http-equiv="X-UA-Compatible">
-    <meta content="width=device-width,initial-scale=1" name="viewport">
-    <meta content="description" name="description">
-    <meta http-equiv="ScreenOrientation" content="autoRotate:disabled">
-    <meta name="google" content="notranslate" />
-
-    <!-- Disable tap highlight on IE -->
-    <meta name="msapplication-tap-highlight" content="no">
-
-    <link rel="apple-touch-icon" sizes="180x180" href="./static/assets/apple-icon-180x180.png">
-    <link href="./static/images/favicon.png" rel="icon">
-
-    <title>Welcome to FX Risk App</title>
-    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
-    <link href="./static/frontend.css" rel="stylesheet">
-    <link href="./static/main.css" rel="stylesheet">
-</head>
-
-<body class="register">
-    <div class="page-wrapper">
-        <div class="header">
-            <a href="#" class="logo text-center"><img src="./static/images/white-logo.png" alt="FX Risk App" /></a>
-            <a href="{{ url_for('account_page') }}" class="img-icon">
-                <img src="./static/images/user.png" alt="Account" />
-                <span>Account</span>
-            </a>
+{% block content %}
+<div class="step active" id="step1">
+    <strong class="float-right text-theme">1/3</strong>
+    <h3>Enter Information</h3>
+    <div class="form-wrapper">
+        <div class="form-field half first">
+            <label for="first_name">First Name</label>
+            <input type="text" id="first_name" name="first_name" placeholder="Your First Name" />
         </div>
-        <div class="page-content">  
-        <div class="navigation-wrapper">
-            <a href="#" class="img-icon">
-                <div class="icon-wrapper"><img src="./static/images/home-selected.png" alt="Account" /></div>
-                <span>Home</span>
-            </a>
-            <a href="#" class="img-icon">
-                <div class="icon-wrapper"><img src="./static/images/enter.png" alt="Account" /></div>
-                <span>Enter Details</span>
-            </a>
-            <a href="#" class="img-icon">
-                <div class="icon-wrapper"><img src="./static/images/reports.png" alt="Account" /></div>
-                <span>Reports</span>
-            </a>
-            <a href="#" class="img-icon">
-                <div class="icon-wrapper"><img src="./static/images/suggestion.png" alt="Account" /></div>
-                <span>Suggestion Tool</span>
-            </a>
-            <a href="#" class="img-icon">
-                <div class="icon-wrapper"><img src="./static/images/about.png" alt="Account" /></div>
-                <span>About</span>
-            </a>
+        <div class="form-field half">
+            <label for="last_name">Last Name</label>
+            <input type="text" id="last_name" name="last_name" placeholder="Your Last Name" />
         </div>
-        <div class="main-content">
-            <div class="step active" id="step1">
-                <h3>Enter Information</h3>
-                <div class="form-wrapper">
-                    <div class="form-field half first">
-                        <label for="first_name">First Name</label>
-                        <input type="text" id="first_name" name="first_name" placeholder="Your First Name"/>
-                    </div>
-                    <div class="form-field half">
-                        <label for="last_name">First Name</label>
-                        <input type="text" id="last_name" name="last_name" placeholder="Your Last Name"/>
-                    </div>
-                    <div class="form-field full">
-                        <label for="password">Password</label>
-                        <input type="password" id="password" name="password" placeholder="********"/>
-                    </div>
-                    <div class="form-field full">
-                        <label for="company_name">Company Name</label>
-                        <input type="text" id="company_name" name="last_name" placeholder="Your Company"/>
-                    </div>
-                    <div class="form-field full">
-                        <label for="company_name">Address</label>
-                        <input type="text" id="address" name="address" placeholder="123 street"/>
-                    </div>
-                    <div class="form-field full">
-                        <label for="phoneno">Phone Number</label>
-                        <input type="text" id="phoneno" name="phoneno" placeholder="555 555 5555"/>
-                    </div>
-                    <div class="form-field full">
-                        <label for="base_currency">Base Currency</label>
-                        <select>
-                            {% for each in rates %}
-                                <option val={{ each }}>{{each}}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <a href="#" class="btn btn-brown btn-solid" onclick="showStep('step2')">Next</a>
-                </div>
-            </div>
-            <div class="step" id="step2">
-                <h3>Choose Plan</h3>
-                <div class="plan">
-                    <ul>
-                        <li>FX Exposure Consolidation</li>
-                        <li>FX Portfolio - Value at Risk (up to 5 Currency Pairs)</li>
-                        <li>1 Time Horizon </li>
-                    </ul>
-                </div>
-                <div class="plan">
-                    <ul>
-                        <li>FX Exposure Consolidation</li>
-                        <li>FX Portfolio - Value at Risk (up to 20 Currency Pairs)</li>
-                        <li>3 Time Horizon </li>
-                        <li>Ability to save and  access previous reports</li>
-                        <li>Trade Suggestions to minimize risk (2 scenarios)</li>
-                        <li>Trading Partners Rate Comparison (2)</li>
-                    </ul>
-                </div>
-                <div class="plan">
-                    <ul>
-                        <li>FX Exposure Consolidation</li>
-                        <li>FX Portfolio - Value at Risk (no limit on Currency Pairs)</li>
-                        <li>8 Time Horizon </li>
-                        <li>Ability to save and  access previous reports</li>
-                        <li>Trade Suggestions to minimize risk (2 scenarios)</li>
-                        <li>Trading Partners Rate Comparison (4)</li>
-                        <li>Exposure Heat Map Report</li>
-                    </ul>
-                </div>
-                <a href="#" class="btn btn-brown btn-outline" onclick="return showStep('step1')">Previous</a>
-                <a href="#" class="btn btn-brown btn-solid" onclick="return showStep('step3')">Next</a>
-            </div>
-            <div id="step3" class="step">
-                <h3>Enter Payment Info</h3>
-                <a href="#" class="btn btn-brown btn-outline" onclick="return showStep('step2')">Previous</a>
-                <a href="{{ url_for('enter_exposure_page') }}" class="btn btn-brown btn-solid">Next</a>
-            </div>
+        <div class="form-field full first">
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" placeholder="********" />
         </div>
-        </div>                
+        <div class="form-field full">
+            <label for="company_name">Company Name</label>
+            <input type="text" id="company_name" name="last_name" placeholder="Your Company" />
+        </div>
+        <div class="form-field full">
+            <label for="company_name">Address</label>
+            <input type="text" id="address" name="address" placeholder="123 street" />
+        </div>
+        <div class="form-field full">
+            <label for="phoneno">Phone Number</label>
+            <input type="text" id="phoneno" name="phoneno" placeholder="555 555 5555" />
+        </div>
+        <div class="form-field full">
+            <label for="base_currency">Base Currency</label>
+            <select>
+                {% for each in rates %}
+                <option val={{ each }}>{{each}}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <a href="#" class="btn btn-brown btn-solid full" onclick="showStep('step2')">Next</a>
     </div>
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="./static/script.js"></script>
-</body>
-
-</html>
+</div>
+<div class="step" id="step2">
+    <strong class="float-right text-theme">2/3</strong>
+    <h3>Choose Plan</h3>
+    <div>
+        <strong>Free</strong>
+        <span class="float-right">
+            <label class="checkbox">
+                <input type="radio" checked="checked" name="plan" value="free" aria-label="Free" />
+                <span class="check"></span>
+            </label>
+        </span>
+    </div>
+    <div class="plan card py-1 my-2">
+        {% for each in [
+            "FX Exposure Consolidation",
+            "FX Portfolio - Value at Risk (up to 5 Currency Pairs)",
+            "1 Time Horizon"
+        ] %}
+        <div><i class="fas fa-check text-theme ml-3 mr-3"></i>{{each}}</div>
+        {% endfor %}
+        <div><div class="float-right mr-2 text-success">Free</div></div>
+    </div>
+    <br />
+    <div>
+        <strong>Premium</strong>
+        <span class="float-right">
+            <label class="checkbox">
+                <input type="radio" name="plan" value="premium" aria-label="Premium" />
+                <span class="check"></span>
+            </label>
+        </span>
+    </div>
+    <div class="plan card py-1 my-2">
+        {% for each in [
+            "FX Exposure Consolidation",
+            "FX Portfolio - Value at Risk (up to 20 Currency Pairs)",
+            "3 Time Horizon",
+            "Ability to save and access previous reports",
+            "Trade Suggestions to minimize risk (2 scenarios)",
+            "Trading Partners Rate Comparison (2)",    
+        ] %}
+        <div><i class="fas fa-check text-theme ml-3 mr-3"></i>{{each}}</div>
+        {% endfor %}
+        <div><div class="float-right mr-3 text-success">$19.99/Month</div></div>
+    </div>
+    <br />
+    <div>
+        <strong>Business</strong>
+        <span class="float-right">
+            <label class="checkbox">
+                <input type="radio" name="plan" value="business" aria-label="Business" />
+                <span class="check"></span>
+            </label>
+        </span>
+    </div>
+    <div class="plan card py-1 my-2">
+        {% for each in [
+            "FX Exposure Consolidation",
+            "FX Portfolio - Value at Risk (no limit on Currency Pairs)",
+            "8 Time Horizon",
+            "Ability to save and access previous reports",
+            "Trade Suggestions to minimize risk (2 scenarios)",
+            "Trading Partners Rate Comparison (4)",
+            "Exposure Heat Map Report",
+        ] %}
+        <div><i class="fas fa-check text-theme ml-3 mr-3"></i>{{each}}</div>
+        {% endfor %}
+        <div><div class="float-right mr-3 text-success">$49.99/Month</div></div>
+    </div>
+    <br />
+    <div class="half first">
+        <a href="#" class="btn btn-brown btn-outline full" onclick="return showStep('step1')">Previous</a>
+    </div>
+    <div class="half">
+        <a href="#" class="btn btn-brown btn-solid full" onclick="return showStep('step3')">Next</a>
+    </div>
+</div>
+<div id="step3" class="step">
+    <strong class="float-right text-theme">3/3</strong>
+    <h3>Enter Payment Info</h3>
+    <ul>
+        <li>
+            <label class="checkbox">
+                <input type="radio" name="payment_method" value="credit-card" aria-label="Credit Card" />
+                <span class="check"></span>
+            </label>
+            <span class="ml-3">Credit Card</span>
+        </li>
+        <li>
+            <label class="checkbox">
+                <input type="radio" name="payment_method" value="paypal" aria-label="PayPal" />
+                <span class="check"></span>
+            </label>
+            <span class="ml-3">PayPal</span>
+        </li>
+    </ul>
+    <div class="form-wrapper">
+        <div class="form-field half first">
+            <label for="first_name">First Name *</label>
+            <input type="text" id="first_name" name="first_name" placeholder="Your First Name" required />
+        </div>
+        <div class="form-field half">
+            <label for="last_name">Last Name *</label>
+            <input type="text" id="last_name" name="last_name" placeholder="Your Last Name" required />
+        </div>
+        <div class="form-field full">
+            <label for="password">Card Number</label>
+            <input type="password" id="password" name="password" placeholder="4111 1111 1111 1111" required />
+        </div>
+        <div class="form-field half first">
+            <label for="expiry_month">Expiry *</label>
+            <select id="expiry_month" name="expiry_month" required>
+                <option>Month</option>
+                {% for each in range(1, 13) %}
+                <option val={{ each }}>{{each}}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-field half">
+            <label for="expiry_year">&nbsp;</label>
+            <select id="expiry_year" name="expiry_year" placeholder="Expiry Year" required>
+                <option>Year</option>
+                {% for each in range(2000, 2050) %}
+                <option val={{ each }}>{{each}}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-field full">
+            <label for="cvv">CVV</label>
+            <input type="password" size="3" pattern="[0-9]{3}" id="cvv" name="cvv" placeholder="***" required />
+        </div>
+        <div class="half first">
+            <a href="#" class="btn btn-brown btn-outline full" onclick="return showStep('step2')">Previous</a>
+        </div>
+        <div class="half">
+            <a class="btn btn-brown btn-solid full" href="{{ url_for('enter_exposure_page') }}">Next</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

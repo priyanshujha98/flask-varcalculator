@@ -1,16 +1,100 @@
-@font-face {
-    font-family: 'SFProText';    
-    src: url('SFProText-Semibold.ttf')  format('truetype'), /* Safari, Android, iOS */         
-}
 body, html{
     width: 100%;
     height: 100%;
     margin: 0;
     padding: 0;
+    font-family: 'Montserrat', sans-serif;
 }
 
 *{
     box-sizing: border-box;
+}
+
+.bg-theme {
+    background-color: #af2318 !important;
+}
+
+.text-theme {
+    color: #af2318 !important;
+}
+
+input, select {
+    border: 0.15rem solid #d3d3d362;
+    outline: 0;
+    border-radius: 0.5rem;
+    background-color: white;
+}
+
+input:focus, select:focus {
+    border-color: #af2318;
+}
+
+input::placeholder, select::placeholder {
+    color: lightgrey;
+    opacity: 0.8;
+}
+
+.checkbox {
+    position: relative;
+    left: -1rem;
+}
+
+/* Hide the browser's default checkbox */
+.checkbox input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+}
+
+/* Create a custom checkbox */
+.checkbox .check {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 1rem;
+  width: 1rem;
+  margin-right: 1rem;
+  border-radius: 1rem;
+  border: 0.1rem solid #af2318;
+  background-color: transparent;
+  cursor: pointer;
+}
+
+/* When the checkbox is checked, add a blue background */
+.checkbox input:checked ~ .check {
+  background-color: #af2318;
+}
+
+/* Create the checkmark/indicator (hidden when not checked) */
+.check:after {
+  content: "";
+  position: absolute;
+  display: none;
+}
+
+/* Show the checkmark when checked */
+.checkbox input:checked ~ .check:after {
+  display: block;
+}
+
+/* Style the checkmark/indicator */
+.checkbox .check:after {
+  left: 0.3rem;
+  top: 0.15rem;
+  width: 0.25rem;
+  height: 0.5rem;
+  border: solid white;
+  border-width: 0 0.1rem 0.1rem 0;
+  -webkit-transform: rotate(45deg);
+  -ms-transform: rotate(45deg);
+  transform: rotate(45deg);
+}
+
+.mute {
+    background-color: transparent;
+    outline: none;
 }
 
 h1,h2,h3,h4{
@@ -53,6 +137,7 @@ img{
 
 .btn:hover, .btn:focus{
     opacity: .8;
+    outline: none;
 }
 .btn-solid.btn-brown{
     background-color: #af2318;
@@ -89,7 +174,7 @@ h3{
 
 input[type="text"], input[type="email"],input[type="password"],select, input[type="number"]{
     width: 100%;
-    padding: 5px;
+    padding: 0.7rem;
 }
 
 label{
