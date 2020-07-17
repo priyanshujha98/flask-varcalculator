@@ -12,8 +12,6 @@ from flask_user import current_user, login_required, roles_required, UserManager
 from forex_python.converter import CurrencyRates
 
 # Class-based application configuration
-
-
 class ConfigClass(object):
     """ Flask application config """
 
@@ -41,16 +39,8 @@ class ConfigClass(object):
     USER_EMAIL_SENDER_NAME = USER_APP_NAME
     USER_EMAIL_SENDER_EMAIL = "noreply@example.com"
 
-
-def create_app():
-    """ Flask application factory """
-
-    # Create Flask app load app.config
-    app = Flask(__name__)
-    app.config.from_object(__name__+'.ConfigClass')
-
-    # Initialize Flask-BabelEx
-    babel = Babel(app)
+def add_models(app):
+    """ Add DB Models to Flask App """
 
     # Initialize Flask-SQLAlchemy
     db = SQLAlchemy(app)
@@ -121,40 +111,23 @@ def create_app():
         user.roles.append(Role(name='Agent'))
         db.session.add(user)
         db.session.commit()
+    
+    return app
+
+def add_routes(app):
+    """ Add Routes to Flask App """
 
     # The Home page is accessible to anyone
     @app.route('/admin')
     @roles_required('Admin')
     def home_page():
-        return render_template_string("""
-                {% extends "admin_layout.html" %}
-                {% block content %}
-                    <h2>{%trans%}Home page{%endtrans%}</h2>
-                    <p><a href={{ url_for('user.register') }}>{%trans%}Register{%endtrans%}</a></p>
-                    <p><a href={{ url_for('user.login') }}>{%trans%}Sign in{%endtrans%}</a></p>
-                    <p><a href={{ url_for('home_page') }}>{%trans%}Home Page{%endtrans%}</a> (accessible to anyone)</p>
-                    <p><a href={{ url_for('member_page') }}>{%trans%}Member Page{%endtrans%}</a> (login_required: member@example.com / Password1)</p>
-                    <p><a href={{ url_for('admin_page') }}>{%trans%}Admin Page{%endtrans%}</a> (role_required: admin@example.com / Password1')</p>
-                    <p><a href={{ url_for('user.logout') }}>{%trans%}Sign out{%endtrans%}</a></p>
-                {% endblock %}
-                """)
+        return render_template('./admin/home.html')
 
     # The Members page is only accessible to authenticated users
     @app.route('/admin/members')
     @login_required    # Use of @login_required decorator
     def member_page():
-        return render_template_string("""
-                {% extends "admin_layout.html" %}
-                {% block content %}
-                    <h2>{%trans%}Members page{%endtrans%}</h2>
-                    <p><a href={{ url_for('user.register') }}>{%trans%}Register{%endtrans%}</a></p>
-                    <p><a href={{ url_for('user.login') }}>{%trans%}Sign in{%endtrans%}</a></p>
-                    <p><a href={{ url_for('home_page') }}>{%trans%}Home Page{%endtrans%}</a> (accessible to anyone)</p>
-                    <p><a href={{ url_for('member_page') }}>{%trans%}Member Page{%endtrans%}</a> (login_required: member@example.com / Password1)</p>
-                    <p><a href={{ url_for('admin_page') }}>{%trans%}Admin Page{%endtrans%}</a> (role_required: admin@example.com / Password1')</p>
-                    <p><a href={{ url_for('user.logout') }}>{%trans%}Sign out{%endtrans%}</a></p>
-                {% endblock %}
-                """)
+        return render_template('./admin/members.html')
 
     # The Admin page requires an 'Admin' role.
     @app.route('/admin/dashboard')
@@ -189,7 +162,17 @@ def create_app():
     def report_page():
         c = CurrencyRates()
         rates = list(c.get_rates('USD'))
+        typ = request.args.get('type')
+        if typ == 'heatmap':
+            return render_template('./report-heatmap.html', rates=rates)
+        elif typ == 'chart':
+            return render_template('./report-chart.html', rates=rates)
         return render_template('./report.html', rates=rates)
+    
+    @app.route('/suggestion-tool')
+    def suggestion_tool_page():
+        number = request.args.get('number') or 1
+        return render_template('./suggestion_tool.html', number=int(number))
 
     @app.route('/account')
     def account_page():
@@ -197,12 +180,30 @@ def create_app():
         rates = list(c.get_rates('USD'))
         return render_template('./account.html', rates=rates)
 
-    @ app.route('/')
+    @app.route('/')
     def index():
         return render_template('./splash.html')
 
     return app
 
+
+def create_app():
+    """ Flask application factory """
+
+    # Create Flask app load app.config
+    app = Flask(__name__)
+    app.config.from_object(__name__+'.ConfigClass')
+
+    # Initialize Flask-BabelEx
+    babel = Babel(app)
+
+    # Setup Flask DB
+    add_models(app)
+
+    # Setup Flask Server Routes
+    add_routes(app)
+
+    return app
 
 # Start development web server
 if __name__ == '__main__':

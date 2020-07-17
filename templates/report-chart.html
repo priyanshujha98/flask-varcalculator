@@ -1,0 +1,110 @@
+{% extends 'base_page.html' %}
+
+{% block content %}
+<div class="step active" id="step1">
+  <h3 class="mb-2">Reports</h3>
+
+  <div class="mr-3 border border-theme bg-white rounded-pill float-right row">
+    <span class="col-6 rounded-pill bg-theme text-white">
+      <a href="{{ url_for('report_page', type='chart') }}" class="img-icon">
+        <strong>Chart</strong>
+      </a>
+    </span>
+    <span class="col-6 text-theme">
+      <a href="{{ url_for('report_page', type='table') }}" class="text-theme img-icon">
+        <strong>Table</strong>
+      </a>
+    </span>
+  </div>
+
+  <h5 class="mb-2">VAR (Value at Risk) Report</h5>
+  <div class="clearfix"></div>
+  <br />
+  
+  <div id="container" class="full bg-transparent"></div>
+  <br />
+
+  <div class="row">
+    <div class="col-3 card element-border text-center">
+      Exposure Amounts
+      <h4>4,665.000</h4>
+    </div>
+    <div class="col-3 card element-border text-center">
+      Individual <br /> VaR
+      <h4>132.678</h4>
+    </div>
+    <div class="col-3 card element-border text-center">
+      Component VaR
+      <h4>132.678</h4>
+    </div>
+    <div class="col-3 card element-border text-center">
+      Contribution to Risk
+      <h4>100%</h4>
+    </div>
+  </div>
+  <br />
+  <div class="row ">
+    <div class="col-6 text-right">
+      <div class="text-right"><br /></div>
+      <div class="text-right">
+        Portfolio Diversification Benefit
+      </div>
+      <div class="text-right"><strong>Total VaR</strong></div>
+    </div>
+    <div class="col-6">
+      <div class="row">
+        <div class="col-6 text-center">Amount</div>
+        <div class="col-6 text-center">%</div>
+      </div>
+      <div class="row">
+        <div class="col-6 text-center">(53.522)</div>
+        <div class="col-6 text-center">29%</div>
+      </div>
+      <div class="row">
+        <div class="col-6 text-center"><strong>132.678</strong></div>
+      </div>
+    </div>
+  </div>
+  <br />
+  <a href="{{ url_for('report_page', type='heatmap') }}" class="btn btn-brown btn-outline full">
+    View Exposure Heat Map
+  </a>
+</div>
+
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/modules/series-label.js"></script>
+<script src="https://code.highcharts.com/modules/accessibility.js"></script>
+<script type="text/javascript">
+  Highcharts.chart('container', {
+    title: {
+      text: 'VaR Report',
+    },
+    chart: {
+      backgroundColor: '#fff9f9',
+    },
+    xAxis: {
+      categories: ['CAD-USD', 'EUR-USD', 'JPY-EUR', 'NZD-JPY', 'INR-NOK']
+    },
+    series: [{
+      type: 'column',
+      name: 'Contribution To Risk',
+      data: [21, 12, 11, 16, 5]
+    }, {
+      type: 'column',
+      name: 'Individual VaR',
+      data: [40, 22, 20, 30, 10]
+    }, {
+      type: 'spline',
+      name: 'Component VaR',
+      data: [38, 21, 19, 28, 9],
+      marker: {
+        lineWidth: 2,
+        lineColor: Highcharts.getOptions().colors[3],
+        fillColor: 'white'
+      },
+      label: []
+    }]
+  }
+  );
+</script>
+{% endblock %}

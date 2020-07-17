@@ -4,6 +4,7 @@ body, html{
     margin: 0;
     padding: 0;
     font-family: 'Montserrat', sans-serif;
+    font-size: 0.9rem;
 }
 
 *{
@@ -13,16 +14,28 @@ body, html{
 .bg-theme {
     background-color: #af2318 !important;
 }
-
 .text-theme {
     color: #af2318 !important;
 }
+.border-theme {
+    border-color: #af2318 !important;
+}
 
-input, select {
+.element-border {
     border: 0.15rem solid #d3d3d362;
     outline: 0;
     border-radius: 0.5rem;
     background-color: white;
+}
+
+.pill-left {
+    border-top-left-radius: 1rem;
+    border-bottom-left-radius: 1rem;
+}
+
+.pill-right {
+    border-top-right-radius: 1rem;
+    border-bottom-right-radius: 1rem;
 }
 
 input:focus, select:focus {

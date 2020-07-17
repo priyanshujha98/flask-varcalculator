@@ -2,71 +2,93 @@
 
 {% block content %}
 <div class="step active" id="step1">
-    <h3>Enter Exposure</h3>
-    <div class="form-wrapper">
-        <div class="exposure-table">
-            <table id="exposure-table">
-                <thead>
-                    <tr>
-                        <td>Short Currency</td>
-                        <td>Long Currency</td>
-                        <td>Amount In Base Currency (USD)</td>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>
-                            <select name="short[]" class="mute">
-                                {% for each in rates %}
-                                <option val={{ each }}>{{each}}</option>
-                                {% endfor %}
-                            </select>
-                        </td>
-                        <td>
-                            <select name="long[]" class="mute">
-                                {% for each in rates %}
-                                <option val={{ each }}>{{each}}</option>
-                                {% endfor %}
-                            </select>
-                        </td>
-                        <td>
-                            <input type="number" name="amount[]" class="mute" />
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-            <input type="hidden" id="exposure_row_hidden"
-                value='<tr><td><select name="short[]" class="mute">{% for each in rates %}<option val={{ each }}>{{each}}</option>{% endfor %}</select></td><td><select name="long[]" class="mute">{% for each in rates %}<option val={{ each }}>{{each}}</option>{% endfor %}</select></td><td><input type="number" name="amount[]" class="mute"></td></tr>' />
-        </div>
-        <div class="half first"><a href="#" class="btn btn-brown btn-outline full" onclick="addExposureRow()"><img
-                    src="./static/images/plus.png" alt="Save" />Add Row</a></div>
-        <div class="half"><a href="#" class="btn btn-blue btn-solid full">Upload CSV</a></div>
-        <div class="clearfix"></div>
+    <h3 class="mb-2">Reports</h3>
 
-        <h4>Choose Time Horizon</h4>
-        <div class="form-field half first">
-            <label for="time_horizon">Time Horizon</label>
-            <select id="time_horizon" name="time_horizon">
-                <option val="90days">90 Days</option>
-                <option val="60days">60 Days</option>
-                <option val="30days">30 Days</option>
-            </select>
-        </div>
-        <div class="clearfix"></div>
-        <h4>Choose Confidence Level</h4>
-        <div class="form-field half first">
-            <label for="confidence_level">Confidence Level</label>
-            <select id="confidence_level" name="confidence_level">
-                <option val="95%">95%</option>
-                <option val="90%">90%</option>
-                <option val="85%">85%</option>
-            </select>
-        </div>
-        <div class="clearfix"></div>
-        <div class="half first"><a href="#" class="btn btn-green btn-outline full"><img src="./static/images/save.png"
-                    alt="Save" />Save</a></div>
-        <div class="half"><a href="#" class="btn btn-brown btn-solid full"><img
-                    src="./static/images/calculator-icon.png" alt="Calculate" />Calculate</a></div>
+    <div class="mr-3 border border-theme bg-white rounded-pill float-right row">
+        <span class="col-6 pill-left">
+            <a href="{{ url_for('report_page', type='chart') }}" class="text-theme img-icon">
+                <strong>Chart</strong>
+            </a>
+        </span>
+        <span class="col-6 rounded-pill bg-theme text-white"><strong>Table</strong></span>
     </div>
+
+    <h5 class="mb-2">VAR (Value at Risk) Report</h5>
+
+    <div class="row">
+        <div class="p-1 col-4 ml-3 rounded-pill bg-theme text-white text-center">
+            <span class="p-2 rounded-pill"><strong>Confidence</strong></span>
+            &nbsp;
+            <span class="p-2 rounded-pill"><strong>95%</strong></span>
+        </div>
+    </div>
+    <br />
+    <table id="exposure-table" class="full">
+        <thead>
+            <tr>
+                <td style="width: 15%;">Currency Pair</td>
+                <td>Exposure Currency</td>
+                <td>Exposure Amounts Base Equivalent Currency</td>
+                <td>Invidivdual VaR</td>
+                <td>Component VaR</td>
+                <td>Contribution to Risk</td>
+            </tr>
+        </thead>
+        <tbody>
+            {% for each in [
+                ["CAD-USD", "USD", "1,000.000", 40.000, 38.000, "21%"],
+                ["EUR-USD", "USD", "555.000", 22.200, 21.090, "12%"],
+                ["JPY-EUR", "EUR", "500.000", 20.000, 19.000, "11%"],
+                ["NZD-JPY", "JPY", "750.000", 30.000, 28.500, "16%"],
+                ["SEK-GBP", "GBP", "250.000", 10.000, 9.500, "5%"],
+                ["HUF-CAD", "CAD", "1000.000", 40.000, 38.000, "21%"],
+                ["INR-NOK", "NOK", "600.000", 24.000, 22.800, "13%"],
+                ["Total", "", "4,665.000", 186.200, 176.890, "100%"],
+            ] %}
+            <tr>
+                {% for f in each %}
+                <td class="py-3 text-center" style="width: 15%;"><strong>{{ f }}</strong></td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <div class="clearfix"></div>
+    <br />
+    <div class="row">
+        <div class="col-7 text-center">
+            Portfolio Diversification Benefit
+        </div>
+        <div class="col-5">
+            <div class="row mb-2">
+                <div class="col-8 text-center">
+                    <span class="p-1 px-3 rounded-pill bg-theme text-white">Amount</span>
+                </div>
+                <div class="col-4 text-center">
+                    <span class="p-1 px-3 rounded-pill bg-theme text-white">%</span>
+                </div>
+            </div>
+            <div class="divider"></div>
+            <div class="row">
+                <div class="col-8 text-center">
+                    <strong>(53.522)</strong>
+                </div>
+                <div class="col-4 text-center">
+                    <strong>29%</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+    <br />
+    <div class="container">
+        <div class="rounded-pill border border-lg border-success row">
+            <span class="col-10 rounded-pill bg-success text-white"><strong>Total VaR</strong></span>
+            <span class="col-2 text-success"><strong>132.678</strong></span>
+        </div>
+    </div>
+    <br />
+    <a href="{{ url_for('report_page', type='heatmap') }}" class="btn btn-brown btn-outline full">
+        View Exposure Heat Map
+    </a>
 </div>
 {% endblock %}

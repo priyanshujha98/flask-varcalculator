@@ -8,29 +8,35 @@
             <table id="exposure-table" class="full">
                 <thead>
                     <tr>
-                        <td>Short Currency</td>
-                        <td>Long Currency</td>
-                        <td>Amount In Base Currency (USD)</td>
+                        <td class="w-25">Liability Currency</td>
+                        <td class="w-25">Asset Currency</td>
+                        <td class="w-50">Amount In Base Currency (USD)</td>
                     </tr>
                 </thead>
                 <tbody>
                     <tr class="py-3">
-                        <td>
-                            <select name="short[]" class="mute">
-                                {% for each in rates %}
-                                <option val={{ each }}>{{each}}</option>
-                                {% endfor %}
-                            </select>
+                        <td class="w-25">
+                            <strong>
+                                <select name="short[]" class="mute">
+                                    {% for each in rates %}
+                                    <option val={{ each }}>{{each}}</option>
+                                    {% endfor %}
+                                </select>
+                            </strong>
                         </td>
-                        <td>
-                            <select name="long[]" class="mute">
-                                {% for each in rates %}
-                                <option val={{ each }}>{{each}}</option>
-                                {% endfor %}
-                            </select>
+                        <td class="w-25">
+                            <strong>
+                                <select name="long[]" class="mute">
+                                    {% for each in rates %}
+                                    <option val={{ each }}>{{each}}</option>
+                                    {% endfor %}
+                                </select>
+                            </strong>
                         </td>
-                        <td>
-                            <input type="number" name="amount[]" class="mute" />
+                        <td class="w-50">
+                            <strong>
+                                <input type="number" name="amount[]" class="mute" />
+                            </strong>
                         </td>
                     </tr>
                 </tbody>
@@ -43,27 +49,29 @@
         </div>
         <div class="half"><a href="#" class="btn btn-blue btn-solid full">CSV Upload</a></div>
         <div class="clearfix"></div>
-
+        <br />
         <h4>Choose Time Horizon</h4>
         <div class="form-field half first">
             <label for="time_horizon">Time Horizon</label>
-            <select id="time_horizon" name="time_horizon">
-                <option val="90days">90 Days</option>
-                <option val="60days">60 Days</option>
-                <option val="30days">30 Days</option>
+            <select class="element-border" id="time_horizon" name="time_horizon">
+                {% for each in [7, 14, 30, 60, 90, 120, 180, 365] %}
+                <option val="{{each}}days">{{ each }} Days</li>
+                {% endfor %}
             </select>
         </div>
         <div class="clearfix"></div>
+        <br />
         <h4>Choose Confidence Level</h4>
         <div class="form-field half first">
             <label for="confidence_level">Confidence Level</label>
-            <select id="confidence_level" name="confidence_level">
-                <option val="95%">95%</option>
-                <option val="90%">90%</option>
-                <option val="85%">85%</option>
+            <select class="element-border" id="confidence_level" name="confidence_level">
+                {% for each in [95, 90, 85, 80] %}
+                <option val="{{each}}%">{{ each }}%</li>
+                {% endfor %}
             </select>
         </div>
         <div class="clearfix"></div>
+        <br />
         <div class="half first"><a href="#" class="btn btn-green btn-outline full"><img src="./static/images/save.png"
                     alt="Save" />Save</a></div>
         <div class="half"><a href="{{ url_for('report_page') }}" class="btn btn-brown btn-solid full"><img

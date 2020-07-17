@@ -4,44 +4,116 @@
 <div class="step active" id="step1">
     <strong class="float-right text-theme">1/3</strong>
     <h3>Enter Information</h3>
-    <div class="form-wrapper">
+    <form class="form-wrapper" action="#" onsubmit="showStep('step2')">
         <div class="form-field half first">
             <label for="first_name">First Name</label>
-            <input type="text" id="first_name" name="first_name" placeholder="Your First Name" />
+            <input
+                class="element-border" 
+                type="text" 
+                id="first_name" 
+                name="first_name"
+                placeholder="Your First Name"
+                autocomplete="given-name"
+                required
+            />
         </div>
         <div class="form-field half">
             <label for="last_name">Last Name</label>
-            <input type="text" id="last_name" name="last_name" placeholder="Your Last Name" />
+            <input
+                class="element-border" 
+                type="text" 
+                id="last_name" 
+                name="last_name" 
+                placeholder="Your Last Name"
+                autocomplete="family-name"
+                required
+            />
+        </div>
+        <div class="form-field full">
+            <label for="email">Email ID</label>
+            <input
+                class="element-border" 
+                type="email" 
+                id="email" 
+                name="email" 
+                placeholder="abc@example.com"
+                autocomplete="email"
+                required
+            />
         </div>
         <div class="form-field full first">
             <label for="password">Password</label>
-            <input type="password" id="password" name="password" placeholder="********" />
+            <input
+                class="element-border" 
+                type="password" 
+                id="password" 
+                name="password"
+                placeholder="********"
+                autocomplete="new-password"
+                required
+            />
         </div>
         <div class="form-field full">
             <label for="company_name">Company Name</label>
-            <input type="text" id="company_name" name="last_name" placeholder="Your Company" />
+            <input
+                class="element-border" 
+                type="text" 
+                id="company_name" 
+                name="company_name" 
+                placeholder="Your Company"
+                autocomplete="organization"
+                required
+            />
         </div>
         <div class="form-field full">
-            <label for="company_name">Address</label>
-            <input type="text" id="address" name="address" placeholder="123 street" />
+            <label for="address">Address</label>
+            <input
+                class="element-border" 
+                type="text" 
+                id="address" 
+                name="address" 
+                placeholder="123 street"
+                autocomplete="street-address"
+                required
+            />
         </div>
         <div class="form-field full">
             <label for="phoneno">Phone Number</label>
-            <input type="text" id="phoneno" name="phoneno" placeholder="555 555 5555" />
+            <input
+                class="element-border"
+                type="text"
+                id="phoneno" 
+                name="phoneno"
+                placeholder="555 55 55555"
+                autocomplete="mobile"
+                required
+            />
         </div>
         <div class="form-field full">
             <label for="base_currency">Base Currency</label>
-            <select>
+            <select
+                class="element-border"
+                id="base_currecy" 
+                name="base_currency"
+                autocomplete="transaction-currency"
+            >
                 {% for each in rates %}
                 <option val={{ each }}>{{each}}</option>
                 {% endfor %}
             </select>
         </div>
-        <a href="#" class="btn btn-brown btn-solid full" onclick="showStep('step2')">Next</a>
-    </div>
+        <button type='submit' class="btn btn-brown btn-solid full">Next</button>
+    </form>
 </div>
 <div class="step" id="step2">
+    <a href="#" class="float-left text-theme" onclick="showStep('step1')">
+        <img
+            src="./static/images/arrow-left.png"
+            alt=""
+        />
+    </a>
     <strong class="float-right text-theme">2/3</strong>
+    <br />
     <h3>Choose Plan</h3>
     <div>
         <strong>Free</strong>
@@ -117,41 +189,77 @@
         <a href="#" class="btn btn-brown btn-solid full" onclick="return showStep('step3')">Next</a>
     </div>
 </div>
-<div id="step3" class="step">
+<div id="step3" class="step px-3">
+    <a href="#" class="float-left text-theme" onclick="showStep('step2')">
+        <img src="./static/images/arrow-left.png" alt="" />
+    </a>
     <strong class="float-right text-theme">3/3</strong>
+    <br />
     <h3>Enter Payment Info</h3>
-    <ul>
-        <li>
-            <label class="checkbox">
-                <input type="radio" name="payment_method" value="credit-card" aria-label="Credit Card" />
-                <span class="check"></span>
-            </label>
-            <span class="ml-3">Credit Card</span>
-        </li>
-        <li>
-            <label class="checkbox">
-                <input type="radio" name="payment_method" value="paypal" aria-label="PayPal" />
-                <span class="check"></span>
-            </label>
-            <span class="ml-3">PayPal</span>
-        </li>
-    </ul>
-    <div class="form-wrapper">
+    <form id="payment" onchange="return toggleCreditCardForm()">
+        <ul>
+            <li>
+                <label class="checkbox">
+                    <input type="radio" name="payment_method" value="credit-card" aria-label="Credit Card" />
+                    <span class="check"></span>
+                </label>
+                <span class="ml-3">Credit Card</span>
+            </li>
+            <li>
+                <label class="checkbox">
+                    <input type="radio" name="payment_method" value="paypal" aria-label="PayPal" />
+                    <span class="check"></span>
+                </label>
+                <span class="ml-3">PayPal</span>
+            </li>
+        </ul>
+    </form>
+    <form class="form-wrapper d-none" id="cc_form" action="#">
         <div class="form-field half first">
             <label for="first_name">First Name *</label>
-            <input type="text" id="first_name" name="first_name" placeholder="Your First Name" required />
+            <input
+                class="element-border" 
+                type="text" 
+                id="first_name_cc" 
+                name="first_name" 
+                placeholder="Your First Name" 
+                autocomplete="cc-given-name"
+                required
+            />
         </div>
         <div class="form-field half">
             <label for="last_name">Last Name *</label>
-            <input type="text" id="last_name" name="last_name" placeholder="Your Last Name" required />
+            <input
+                class="element-border" 
+                type="text" 
+                id="last_name_cc" 
+                name="last_name" 
+                placeholder="Your Last Name" 
+                autocomplete="cc-family-name"
+                required
+            />
         </div>
         <div class="form-field full">
-            <label for="password">Card Number</label>
-            <input type="password" id="password" name="password" placeholder="4111 1111 1111 1111" required />
+            <label for="card_number">Card Number</label>
+            <input
+                class="element-border" 
+                type="text" 
+                id="cc_number" 
+                name="cc_number"
+                placeholder="4111 1111 1111 1111"
+                autocomplete="cc-number"
+                required
+            />
         </div>
         <div class="form-field half first">
             <label for="expiry_month">Expiry *</label>
-            <select id="expiry_month" name="expiry_month" required>
+            <select
+                class="element-border" 
+                id="expiry_month" 
+                name="expiry_month" 
+                autocomplete="cc-exp-month"
+                required
+            >
                 <option>Month</option>
                 {% for each in range(1, 13) %}
                 <option val={{ each }}>{{each}}</option>
@@ -160,7 +268,14 @@
         </div>
         <div class="form-field half">
             <label for="expiry_year">&nbsp;</label>
-            <select id="expiry_year" name="expiry_year" placeholder="Expiry Year" required>
+            <select
+                class="element-border" 
+                id="expiry_year" 
+                name="expiry_year" 
+                placeholder="Expiry Year" 
+                autocomplete="cc-exp-year"
+                required
+            >
                 <option>Year</option>
                 {% for each in range(2000, 2050) %}
                 <option val={{ each }}>{{each}}</option>
@@ -169,14 +284,24 @@
         </div>
         <div class="form-field full">
             <label for="cvv">CVV</label>
-            <input type="password" size="3" pattern="[0-9]{3}" id="cvv" name="cvv" placeholder="***" required />
+            <input
+                class="element-border" 
+                type="password" 
+                size="3" 
+                pattern="[0-9]{3}" 
+                id="cvv" 
+                name="cvv" 
+                placeholder="***" 
+                autocomplete="cc-csc"
+                required
+            />
         </div>
-        <div class="half first">
-            <a href="#" class="btn btn-brown btn-outline full" onclick="return showStep('step2')">Previous</a>
-        </div>
-        <div class="half">
-            <a class="btn btn-brown btn-solid full" href="{{ url_for('enter_exposure_page') }}">Next</a>
-        </div>
+    </form>
+    <div class="half first">
+        <a href="#" class="btn btn-brown btn-outline full" onclick="return showStep('step2')">Previous</a>
+    </div>
+    <div class="half">
+        <a class="btn btn-brown btn-solid full" href="{{ url_for('enter_exposure_page') }}">Next</a>
     </div>
 </div>
 {% endblock %}

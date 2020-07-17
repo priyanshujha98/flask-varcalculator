@@ -45,9 +45,14 @@ a.img-icon img{
     background-color: #fff9f9;
     border-top-left-radius: 50px;
     border-top-right-radius: 50px;
-    padding: 3rem 3rem 2rem 3rem;
+    padding: 1rem 4rem 2rem 4rem;
     height: 80vh;
     overflow-y: scroll;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+.main-content::-webkit-scrollbar{
+    display: none;
 }
 
 .step{
