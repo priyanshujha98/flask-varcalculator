@@ -9,9 +9,47 @@ from flask import Flask, request, render_template_string, render_template
 from flask_babelex import Babel
 from flask_sqlalchemy import SQLAlchemy
 from flask_user import current_user, login_required, roles_required, UserManager, UserMixin
-from forex_python.converter import CurrencyRates
+import var
+from forex_python.converter import CurrencyRates, CurrencyCodes
+c = CurrencyRates()
+
+CURRENCIES = [
+    'AUD',
+    'BGN',
+    'BRL',
+    'CAD',
+    'CHF',
+    'CNY',
+    'CZK',
+    'DKK',
+    'GBP',
+    'HKD',
+    'HRK',
+    'HUF',
+    'IDR',
+    'ILS',
+    'INR',
+    'JPY',
+    'KRW',
+    'MXN',
+    'MYR',
+    'NOK',
+    'NZD',
+    'PHP',
+    'PLN',
+    'RON',
+    'RUB',
+    'SEK',
+    'SGD',
+    'THB',
+    'TRY',
+    'USD',
+    'ZAR'
+]
 
 # Class-based application configuration
+
+
 class ConfigClass(object):
     """ Flask application config """
 
@@ -38,6 +76,7 @@ class ConfigClass(object):
     USER_ENABLE_USERNAME = False    # Disable username authentication
     USER_EMAIL_SENDER_NAME = USER_APP_NAME
     USER_EMAIL_SENDER_EMAIL = "noreply@example.com"
+
 
 def add_models(app):
     """ Add DB Models to Flask App """
@@ -111,8 +150,84 @@ def add_models(app):
         user.roles.append(Role(name='Agent'))
         db.session.add(user)
         db.session.commit()
-    
+
     return app
+
+def get_raw_pairs(form, files):
+    if 'exposures_csv' not in files:
+        return []
+    
+    file = files['exposures_csv']
+    rows = [ line.decode("utf-8").split(',') for line in file.read().splitlines() ]
+    file.close()
+    
+    if len(rows) > 0:
+        return [
+            [
+                r[0].strip(), 
+                r[1].strip(), 
+                int(r[2].strip()),
+            ] for r in rows
+        ]
+    else:
+        return list(map(
+            lambda x: [x[0].strip(), x[1].strip(), int(x[2].strip())],
+            zip(
+                form.getlist('short[]'),
+                form.getlist('long[]'),
+                form.getlist('amount[]'),
+            )
+        ))
+    
+
+def handle_report(form, files):
+    raw_pairs = get_raw_pairs(form, files)
+    print(raw_pairs)
+    pairs = list(filter(lambda x: x[0] in CURRENCIES and x[1] in CURRENCIES, raw_pairs))
+
+    n = int(form.getlist('time_horizon').pop())
+    confidence = float(form.getlist('confidence').pop())
+
+    results = list(zip(
+        list(map(lambda p: f"{p[0]}-{p[1]}", pairs)),
+        list(map(lambda p: p[1], pairs)),
+        list(map(lambda p: f"{p[2]:,}", pairs)),
+        list(map(
+            lambda x: f"{round(abs(x), 3):,}", var.get_n_day_individual_vars(
+                pairs, n, confidence)
+        )),
+        list(map(
+            lambda x: f"{round(x, 3):,}", var.get_n_day_component_vars(
+                pairs, n, confidence)
+        )),
+        list(map(
+            lambda x: f"{round(x*100/var.get_portfolio_var(pairs, n, confidence), 1):,}%",
+            var.get_n_day_component_vars(pairs, n, confidence)
+        )),
+    )) + [(
+        "Total",
+        "-",
+        f"{round(sum([p[2] for p in pairs]), 3):,}",
+        f"{round(abs(sum(var.get_n_day_individual_vars(pairs, n, confidence))), 3):,}",
+        f"{round(var.get_portfolio_var(pairs, 7, confidence), 3):,}",
+        "100%",
+    )]
+    benefit_abs = f"{round((
+        abs(sum(var.get_n_day_individual_vars(pairs, 7, 0.95))) - var.get_portfolio_var(pairs, 7, 0.95)),
+        3
+    ):,}"
+    benefit_percent = f"{round((
+        abs(sum(var.get_n_day_individual_vars(pairs, 7, 0.95))) - var.get_portfolio_var(pairs, 7, 0.95)),
+        3
+    ):,}"
+
+    return {
+        'results': results,
+        'benefit_abs': benefit_abs,
+        'benefit_percent': benefit_percent,
+        'confidence': format(confidence*100, '.0f')+"%",
+        'currencies': CURRENCIES,
+    }
 
 def add_routes(app):
     """ Add Routes to Flask App """
@@ -156,19 +271,15 @@ def add_routes(app):
     def enter_exposure_page():
         c = CurrencyRates()
         rates = list(c.get_rates('USD'))
-        return render_template('./exposures.html', rates=rates)
+        return render_template('./exposures.html', currencies=CURRENCIES)
 
-    @app.route('/report')
+    @app.route('/report', methods=['POST'])
     def report_page():
-        c = CurrencyRates()
-        rates = list(c.get_rates('USD'))
-        typ = request.args.get('type')
-        if typ == 'heatmap':
-            return render_template('./report-heatmap.html', rates=rates)
-        elif typ == 'chart':
-            return render_template('./report-chart.html', rates=rates)
-        return render_template('./report.html', rates=rates)
-    
+        return render_template(
+            './report.html',
+            **handle_report(request.form, request.files),
+        )   
+
     @app.route('/suggestion-tool')
     def suggestion_tool_page():
         number = request.args.get('number') or 1
@@ -176,9 +287,7 @@ def add_routes(app):
 
     @app.route('/account')
     def account_page():
-        c = CurrencyRates()
-        rates = list(c.get_rates('USD'))
-        return render_template('./account.html', rates=rates)
+        return render_template('./account.html', rates=[])
 
     @app.route('/')
     def index():
@@ -204,6 +313,7 @@ def create_app():
     add_routes(app)
 
     return app
+
 
 # Start development web server
 if __name__ == '__main__':

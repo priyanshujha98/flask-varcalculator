@@ -17,7 +17,7 @@
     </div>
     <div class="page-content">
       <div class="navigation-wrapper">
-        <a href="#" class="img-icon">
+        <a href="{{ url_for('register_page') }}" class="img-icon">
           <div class="icon-wrapper">
             <img
               src="./static/images/{{ 'home-selected' if 'register' in request.path else 'home' }}.png"
@@ -26,7 +26,7 @@
           </div>
           <span>Home</span>
         </a>
-        <a href="{{ url_for('enter_exposure_page') }}" class="img-icon">
+        <a href="#" class="img-icon">
           <div class="icon-wrapper">
             <img
               src="./static/images/{{ 'enter-selected' if 'exposure' in request.path else 'enter'}}.png"

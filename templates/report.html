@@ -6,7 +6,7 @@
 
     <div class="mr-3 border border-theme bg-white rounded-pill float-right row">
         <span class="col-6 pill-left">
-            <a href="{{ url_for('report_page', type='chart') }}" class="text-theme img-icon">
+            <a href="#" class="text-theme img-icon" onclick="showStep('step2')">
                 <strong>Chart</strong>
             </a>
         </span>
@@ -19,7 +19,7 @@
         <div class="p-1 col-4 ml-3 rounded-pill bg-theme text-white text-center">
             <span class="p-2 rounded-pill"><strong>Confidence</strong></span>
             &nbsp;
-            <span class="p-2 rounded-pill"><strong>95%</strong></span>
+            <span class="p-2 rounded-pill"><strong>{{ confidence }}</strong></span>
         </div>
     </div>
     <br />
@@ -35,16 +35,7 @@
             </tr>
         </thead>
         <tbody>
-            {% for each in [
-                ["CAD-USD", "USD", "1,000.000", 40.000, 38.000, "21%"],
-                ["EUR-USD", "USD", "555.000", 22.200, 21.090, "12%"],
-                ["JPY-EUR", "EUR", "500.000", 20.000, 19.000, "11%"],
-                ["NZD-JPY", "JPY", "750.000", 30.000, 28.500, "16%"],
-                ["SEK-GBP", "GBP", "250.000", 10.000, 9.500, "5%"],
-                ["HUF-CAD", "CAD", "1000.000", 40.000, 38.000, "21%"],
-                ["INR-NOK", "NOK", "600.000", 24.000, 22.800, "13%"],
-                ["Total", "", "4,665.000", 186.200, 176.890, "100%"],
-            ] %}
+            {% for each in results %}
             <tr>
                 {% for f in each %}
                 <td class="py-3 text-center" style="width: 15%;"><strong>{{ f }}</strong></td>
@@ -71,10 +62,10 @@
             <div class="divider"></div>
             <div class="row">
                 <div class="col-8 text-center">
-                    <strong>(53.522)</strong>
+                    <strong>({{ benefit_abs }})</strong>
                 </div>
                 <div class="col-4 text-center">
-                    <strong>29%</strong>
+                    <strong>{{ benefit_percent }}%</strong>
                 </div>
             </div>
         </div>
@@ -83,12 +74,290 @@
     <div class="container">
         <div class="rounded-pill border border-lg border-success row">
             <span class="col-10 rounded-pill bg-success text-white"><strong>Total VaR</strong></span>
-            <span class="col-2 text-success"><strong>132.678</strong></span>
+            <span class="col-2 text-success"><strong>{{results[-1][4]}}</strong></span>
         </div>
     </div>
     <br />
-    <a href="{{ url_for('report_page', type='heatmap') }}" class="btn btn-brown btn-outline full">
+    <a href="#" class="btn btn-brown btn-outline full" onclick="showStep('step3')">
         View Exposure Heat Map
     </a>
 </div>
+<div class="step" id="step2">
+    <h3 class="mb-2">Reports</h3>
+
+    <div class="mr-3 border border-theme bg-white rounded-pill float-right row">
+        <span class="col-6 rounded-pill bg-theme text-white">
+            <a href="#" class="img-icon">
+                <strong>Chart</strong>
+            </a>
+        </span>
+        <span class="col-6 text-theme">
+            <a href="#" class="text-theme img-icon" onclick="showStep('step1')">
+                <strong>Table</strong>
+            </a>
+        </span>
+    </div>
+
+    <h5 class="mb-2">VAR (Value at Risk) Report</h5>
+    <div class="clearfix"></div>
+    <br />
+
+    <div id="barchart" class="full bg-transparent"></div>
+    <br />
+
+    <div class="row">
+        <div class="col-3 card element-border text-center">
+            Exposure Amounts
+            <h4>{{ results[-1][2] }}</h4>
+        </div>
+        <div class="col-3 card element-border text-center">
+            Individual <br /> VaR
+            <h4>{{ results[-1][3] }}</h4>
+        </div>
+        <div class="col-3 card element-border text-center">
+            Component VaR
+            <h4>{{ results[-1][4] }}</h4>
+        </div>
+        <div class="col-3 card element-border text-center">
+            Contribution to Risk
+            <h4>100%</h4>
+        </div>
+    </div>
+    <br />
+    <div class="row ">
+        <div class="col-6 text-right">
+            <div class="text-right"><br /></div>
+            <div class="text-right">
+                Portfolio Diversification Benefit
+            </div>
+            <div class="text-right"><strong>Total VaR</strong></div>
+        </div>
+        <div class="col-6">
+            <div class="row">
+                <div class="col-6 text-center">Amount</div>
+                <div class="col-6 text-center">%</div>
+            </div>
+            <div class="row">
+                <div class="col-6 text-center">({{ benefit_abs }})</div>
+                <div class="col-6 text-center">{{ benefit_percent }}</div>
+            </div>
+            <div class="row">
+                <div class="col-6 text-center"><strong>{{ results[-1][4] }}</strong></div>
+            </div>
+        </div>
+    </div>
+    <br />
+    <a href="#" class="btn btn-brown btn-outline full" onclick="showStep('step3')">
+        View Exposure Heat Map
+    </a>
+</div>
+
+<div class="step" id="step3">
+    <h3 class="mb-2">Exposure Heat Map</h3>
+
+    <div id="heatmap" class="border border-theme rounded-lg">
+        <div class="loading">
+            <i class="icon-spinner icon-spin icon-large"></i>
+            Loading data from Google Spreadsheets...
+        </div>
+    </div>
+
+    <br />
+
+    <a href="#" class="btn bg-theme text-white full">
+        View Full Screen
+    </a>
+
+    <br /><br />
+
+    <a href="#" class="btn btn-brown btn-outline full" onclick="showStep('step1')">
+        View VAR Report
+    </a>
+</div>
+
+<script src="https://code.highcharts.com/maps/highmaps.js"></script>
+<script src="https://code.highcharts.com/maps/modules/data.js"></script>
+<script src="https://code.highcharts.com/mapdata/custom/world.js"></script>
+<script src="https://code.highcharts.com/modules/heatmap.js"></script>
+<script src="https://code.highcharts.com/modules/coloraxis.js"></script>
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/modules/series-label.js"></script>
+<script src="https://code.highcharts.com/modules/accessibility.js"></script>
+<script type="text/javascript">
+    const pairs = "{% for each in results %}{{each[0]}},{% endfor %}".split(',').slice(0, -2);
+    const individual_vars = "{% for each in results %}{{each[3]}},{% endfor %}".split(',').slice(0, -2).map(v => Number(v));
+    const component_vars = "{% for each in results %}{{each[4]}},{% endfor %}".split(',').slice(0, -2).map(v => Number(v));
+    const contributions = "{% for each in results %}{{each[5]}},{% endfor %}".split(',').slice(0, -2).map(v => Number(v.replace('%', '')));
+    
+    Highcharts.chart('barchart', {
+        title: {
+            text: 'VaR Report',
+        },
+        chart: {
+            backgroundColor: '#fff9f9',
+        },
+        xAxis: {
+            categories: pairs
+        },
+        series: [{
+            type: 'column',
+            name: 'Contribution To Risk',
+            data: contributions,
+        }, {
+            type: 'column',
+            name: 'Individual VaR',
+            data: individual_vars,
+        }, {
+            type: 'spline',
+            name: 'Component VaR',
+            data: component_vars,
+            marker: {
+                lineWidth: 2,
+                lineColor: Highcharts.getOptions().colors[3],
+                fillColor: 'white'
+            },
+            label: []
+        }]
+    });
+</script>
+<script type="text/javascript">
+    // possible currency codes
+    const currencyCodes = "{% for c in currencies %}{{ c }},{% endfor %}".split(',');
+    // countries by currency
+    const codeToCountry = {
+        "AUD": ["AUS"],
+        "BRL": ["BRA"],
+        "CAD": ["CAN"],
+        "CHF": ["CHE", "LIE"],
+        "CNY": ["CHN"],
+        "CZK": ["CZE"],
+        "DKK": ["DNK", "FRO", "GRL"],
+        "EUR": ["PRT", "NLD", "FIN", "DEU", "BEL", "LUX", "LTU", "GRC", "AUT", "ESP", "FRA", "ITA"],
+        "GBP": ["GBR"],
+        "HKD": ["HKG"],
+        "HRK": ["HRV"],
+        "HUF": ["HUN"],
+        "IDR": ["IDN"],
+        "ILS": ["ISR"],
+        "INR": ["BTN", "IND"],
+        "ISK": ["ISL"],
+        "JPY": ["JPN"],
+        "KRW": ["KOR"],
+        "MXN": ["MEX"],
+        "MYR": ["MYS"],
+        "NOK": ["NOR"],
+        "NZD": ["NZL"],
+        "PHP": ["PHL"],
+        "PLN": ["POL"],
+        "RON": ["ROU"],
+        "RUB": ["RUS"],
+        "SEK": ["SWE"],
+        "SGD": ["SGP"],
+        "THB": ["THA"],
+        "TRY": ["TUR"],
+        "USD": ["USA"]
+    };
+
+    // sample data we should get from exposure page
+    // let sampleData = { "GBP": 1000, "MXN": 500, "EUR": 2000, "JPY": 1000, "CNY": 600, "PHP": 500, "BRL": 200, "DDD": 500 };
+    let sampleData = "{% for each in results %}{{ each[1] }}:{{ each[2] }},{% endfor %}".split(',').slice(0, -3)
+        .map(r => r.split(':'))
+        .reduce((result, item) => {
+            result[item[0]] = Number(item[1])
+            return result
+        }, {})
+
+    // make chart data from sample data
+    function makeChartData(sampleData) {
+        let res = [];
+        Object.keys(sampleData).forEach(function (key) {
+            if (codeToCountry[key]) {
+                let countries = codeToCountry[key];
+                // console.log(countries);
+                countries.forEach(function (country) {
+                    let tmp = {};
+                    tmp['code'] = country;
+                    tmp['value'] = sampleData[key];
+                    tmp['name'] = country;
+                    console.log(tmp);
+                    res.push(tmp);
+                })
+            }
+        })
+        return res;
+    }
+
+    let data = makeChartData(sampleData);
+
+    // draw highchart map
+    Highcharts.mapChart('heatmap', {
+        chart: {
+            map: 'custom/world',
+            backgroundColor: '#fff9f9',
+        },
+
+        colors: ['rgba(19,64,117,0.05)', 'rgba(19,64,117,0.2)', 'rgba(19,64,117,0.4)',
+            'rgba(19,64,117,0.5)', 'rgba(19,64,117,0.6)', 'rgba(19,64,117,0.8)', 'rgba(19,64,117,1)'],
+
+        title: {
+            text: 'Exposure Heatmap'
+        },
+        mapNavigation: {
+            enabled: true
+        },
+        legend: {
+            title: {
+                text: 'Currency Conversion',
+                style: {
+                    color: ( // theme
+                        Highcharts.defaultOptions &&
+                        Highcharts.defaultOptions.legend &&
+                        Highcharts.defaultOptions.legend.title &&
+                        Highcharts.defaultOptions.legend.title.style &&
+                        Highcharts.defaultOptions.legend.title.style.color
+                    ) || 'black'
+                }
+            },
+            align: 'left',
+            verticalAlign: 'bottom',
+            floating: true,
+            layout: 'vertical',
+            valueDecimals: 0,
+            backgroundColor: '#fff9f9',
+            symbolRadius: 0,
+            symbolHeight: 14
+        },
+
+        colorAxis: {
+            dataClasses: [{
+                to: 100
+            }, {
+                from: 100,
+                to: 300
+            }, {
+                from: 300,
+                to: 500
+            }, {
+                from: 500,
+                to: 800
+            }, {
+                from: 800,
+                to: 1000
+            }, {
+                from: 1000,
+                to: 2000
+            }, {
+                from: 2000
+            }]
+        },
+
+        series: [{
+            data: data,
+            joinBy: ['iso-a3', 'code'],
+            animation: true,
+            shadow: false
+        }]
+    });
+
+</script>
 {% endblock %}

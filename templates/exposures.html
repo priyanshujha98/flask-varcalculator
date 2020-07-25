@@ -3,7 +3,13 @@
 {% block content %}
 <div class="step active" id="step1">
     <h3>Enter Exposure</h3>
-    <div class="form-wrapper">
+    <form
+        class="form-wrapper"
+        name="exposures_form" 
+        method="POST" 
+        action="{{ url_for('report_page') }}"
+        enctype="multipart/form-data"
+    >
         <div class="exposure-table">
             <table id="exposure-table" class="full">
                 <thead>
@@ -18,7 +24,7 @@
                         <td class="w-25">
                             <strong>
                                 <select name="short[]" class="mute">
-                                    {% for each in rates %}
+                                    {% for each in currencies %}
                                     <option val={{ each }}>{{each}}</option>
                                     {% endfor %}
                                 </select>
@@ -27,7 +33,7 @@
                         <td class="w-25">
                             <strong>
                                 <select name="long[]" class="mute">
-                                    {% for each in rates %}
+                                    {% for each in currencies %}
                                     <option val={{ each }}>{{each}}</option>
                                     {% endfor %}
                                 </select>
@@ -35,27 +41,40 @@
                         </td>
                         <td class="w-50">
                             <strong>
-                                <input type="number" name="amount[]" class="mute" />
+                                <input type="number" name="amount[]" value="0" class="mute" />
                             </strong>
                         </td>
                     </tr>
                 </tbody>
             </table>
-            <input type="hidden" id="exposure_row_hidden"
-                value='<tr><td><select name="short[]" class="mute">{% for each in rates %}<option val={{ each }}>{{each}}</option>{% endfor %}</select></td><td><select name="long[]" class="mute">{% for each in rates %}<option val={{ each }}>{{each}}</option>{% endfor %}</select></td><td><input type="number" name="amount[]" class="mute"></td></tr>' />
+            <input 
+                type="hidden" id="exposure_row_hidden"
+                value='<tr><td><select name="short[]" class="mute">{% for each in currencies %}<option val={{ each }}>{{each}}</option>{% endfor %}</select></td><td><select name="long[]" class="mute">{% for each in currencies %}<option val={{ each }}>{{each}}</option>{% endfor %}</select></td><td><input type="number" name="amount[]" value="0" class="mute"></td></tr>' />
         </div>
         <div class="half first"><a href="#" class="btn btn-brown btn-outline full" onclick="addExposureRow()"><img
                     src="./static/images/plus.png" alt="Save" />Add More Rows</a>
         </div>
-        <div class="half"><a href="#" class="btn btn-blue btn-solid full">CSV Upload</a></div>
+        <div class="half">
+            <label class="btn btn-blue btn-solid full">
+                <input
+                    class="d-none" 
+                    type="file" 
+                    id="exposures_csv" 
+                    name="exposures_csv" 
+                    accept=".csv, text/csv"
+                    onchange="this.form.submit();"
+                />
+                CSV Upload
+            </label>
+        </div>
         <div class="clearfix"></div>
         <br />
         <h4>Choose Time Horizon</h4>
         <div class="form-field half first">
             <label for="time_horizon">Time Horizon</label>
-            <select class="element-border" id="time_horizon" name="time_horizon">
+            <select class="element-border" id="time_horizon" name="time_horizon" value=7 required>
                 {% for each in [7, 14, 30, 60, 90, 120, 180, 365] %}
-                <option val="{{each}}days">{{ each }} Days</li>
+                <option value={{each}}>{{ each }} Days</li>
                 {% endfor %}
             </select>
         </div>
@@ -64,9 +83,9 @@
         <h4>Choose Confidence Level</h4>
         <div class="form-field half first">
             <label for="confidence_level">Confidence Level</label>
-            <select class="element-border" id="confidence_level" name="confidence_level">
+            <select class="element-border" id="confidence" name="confidence" value=0.95 required>
                 {% for each in [95, 90, 85, 80] %}
-                <option val="{{each}}%">{{ each }}%</li>
+                <option value={{each/100}}>{{ each }}%</li>
                 {% endfor %}
             </select>
         </div>
@@ -74,8 +93,15 @@
         <br />
         <div class="half first"><a href="#" class="btn btn-green btn-outline full"><img src="./static/images/save.png"
                     alt="Save" />Save</a></div>
-        <div class="half"><a href="{{ url_for('report_page') }}" class="btn btn-brown btn-solid full"><img
-                    src="./static/images/calculator-icon.png" alt="Calculate" />Calculate</a></div>
-    </div>
+        <div class="half">
+            <button type="submit" class="btn btn-brown btn-solid full">
+                <img
+                    src="./static/images/calculator-icon.png"
+                    alt="Calculate" 
+                />
+                Calculate
+            </a>
+        </div>
+    </form>
 </div>
 {% endblock %}

@@ -4,7 +4,7 @@
 <div class="step active" id="step1">
     <strong class="float-right text-theme">1/3</strong>
     <h3>Enter Information</h3>
-    <form class="form-wrapper" action="#" onsubmit="showStep('step2')">
+    <form class="form-wrapper disable-submit" action="#" onsubmit="showStep('step2')">
         <div class="form-field half first">
             <label for="first_name">First Name</label>
             <input
@@ -196,7 +196,7 @@
     <strong class="float-right text-theme">3/3</strong>
     <br />
     <h3>Enter Payment Info</h3>
-    <form id="payment" onchange="return toggleCreditCardForm()">
+    <form id="payment" class="disable-submit" onchange="return toggleCreditCardForm()">
         <ul>
             <li>
                 <label class="checkbox">
@@ -214,7 +214,7 @@
             </li>
         </ul>
     </form>
-    <form class="form-wrapper d-none" id="cc_form" action="#">
+    <form class="form-wrapper disable-submit d-none" id="cc_form" action="#">
         <div class="form-field half first">
             <label for="first_name">First Name *</label>
             <input
