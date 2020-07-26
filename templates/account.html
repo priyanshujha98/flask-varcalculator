@@ -6,37 +6,34 @@
     <div class="profile-section text-center">
         <img src="./static/images/user-2x.png" alt="User">
         <a href="#" class="btn btn-solid btn-brown rounded-lg">Manage Account</a>
-        <div class="membership">Business</div>
+        <div class="membership">{{ plan }}</div>
     </div>
     <div class="form-wrapper uneditable">
         <div class="form-field full">
             <label>Name</label>
-            <h4><strong>Jack Jones</strong></h4>
+            <h4><strong>{{ first_name }} {{ last_name }}</strong></h4>
         </div>
         <div class="form-field full">
             <label>Email</label>
-            <h4><strong>Jack@abc.com</strong></h4>
+            <h4><strong>{{ email }}</strong></h4>
         </div>
         <div class="form-field full">
             <label>Company</label>
-            <h4><strong>Jones Inc.</strong></h4>
+            <h4><strong>{{ company_name }}</strong></h4>
         </div>
         <div class="form-field full">
             <label>Base Currency</label>
-            <h4><strong>USD</strong></h4>
+            <h4><strong>{{ base_currency }}</strong></h4>
         </div>
         <div class="divider"></div>
         <h3>Previous Reports</h3>
         <ul class="previous-reports">
-            {% for report in [
-                "Wednesday, 01-Jul-2020 15:28:26 GMT+0000",
-                "Wednesday, 01-Jul-2020 15:28:26 GMT+0000",
-                "Wednesday, 01-Jul-2020 15:28:26 GMT+0000",
-                "Wednesday, 01-Jul-2020 15:28:26 GMT+0000",
-            ] %}
+            {% for report in reports %}
             <li class="full">
-                {{ report }}
-                <img class="float-right" src="./static/images/arrow-right.png" alt="" />
+                <a href="{{ url_for('report_page', id=report.id) }}">
+                    {{ report.created }}
+                    <img class="float-right" src="./static/images/arrow-right.png" alt="" />
+                </a>
             </li>
             {% endfor %}
         </ul>

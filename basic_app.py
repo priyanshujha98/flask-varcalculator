@@ -4,11 +4,12 @@
 # - Using class-based configuration (instead of file-based configuration)
 # - Using string-based templates (instead of file-based templates)
 
-import datetime
-from flask import Flask, request, render_template_string, render_template
+from datetime import datetime
+from flask import Flask, current_app, request, redirect, render_template_string, render_template
 from flask_babelex import Babel
 from flask_sqlalchemy import SQLAlchemy
 from flask_user import current_user, login_required, roles_required, UserManager, UserMixin
+import json
 import var
 from forex_python.converter import CurrencyRates, CurrencyCodes
 c = CurrencyRates()
@@ -48,8 +49,6 @@ CURRENCIES = [
 ]
 
 # Class-based application configuration
-
-
 class ConfigClass(object):
     """ Flask application config """
 
@@ -74,119 +73,275 @@ class ConfigClass(object):
     USER_APP_NAME = "FX Risk App"
     USER_ENABLE_EMAIL = True        # Enable email authentication
     USER_ENABLE_USERNAME = False    # Disable username authentication
+    USER_ALLOW_LOGIN_WITHOUT_CONFIRMED_EMAIL = True
     USER_EMAIL_SENDER_NAME = USER_APP_NAME
     USER_EMAIL_SENDER_EMAIL = "noreply@example.com"
+    USER_LOGIN_URL = "/login"
+    USER_LOGIN_TEMPLATE = "login.html"
+    USER_AFTER_LOGIN_ENDPOINT = 'enter_exposure_page'
+    USER_REGISTER_URL = "/register"
+    USER_REGISTER_TEMPLATE = "register.html"
+    USER_AFTER_REGISTER_ENDPOINT = 'payment_page'
+    USER_LOGOUT_URL = "/logout"
+    USER_AFTER_LOGOUT_ENDPOINT = "user.login"
 
+# Create Flask app load app.config
+app = Flask(__name__)
+app.config.from_object(__name__+'.ConfigClass')
 
-def add_models(app):
-    """ Add DB Models to Flask App """
+# Initialize Flask-BabelEx
+babel = Babel(app)
 
-    # Initialize Flask-SQLAlchemy
-    db = SQLAlchemy(app)
+# Initialize Flask-SQLAlchemy
+db = SQLAlchemy(app)
 
-    # Define the User data-model.
-    # NB: Make sure to add flask_user UserMixin !!!
-    class User(db.Model, UserMixin):
-        __tablename__ = 'users'
-        id = db.Column(db.Integer, primary_key=True)
-        active = db.Column('is_active', db.Boolean(),
-                           nullable=False, server_default='1')
+# Setup Flask DB
+class TimestampMixin(object):
+    created = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    updated = db.Column(db.DateTime, onupdate=datetime.utcnow)
 
-        # User authentication information. The collation='NOCASE' is required
-        # to search case insensitively when USER_IFIND_MODE is 'nocase_collation'.
-        email = db.Column(db.String(255, collation='NOCASE'),
-                          nullable=False, unique=True)
-        email_confirmed_at = db.Column(db.DateTime())
-        password = db.Column(db.String(255), nullable=False, server_default='')
+# Define the User data-model.
+# NB: Make sure to add flask_user UserMixin !!!
+class User(db.Model, UserMixin):
+    __tablename__ = 'users'
+    id = db.Column(db.Integer, primary_key=True)
+    active = db.Column('is_active', db.Boolean(),
+                       nullable=False, server_default='1')
 
-        # User information
-        first_name = db.Column(
-            db.String(100, collation='NOCASE'), nullable=False, server_default='')
-        last_name = db.Column(
-            db.String(100, collation='NOCASE'), nullable=False, server_default='')
+    # User authentication information. The collation='NOCASE' is required
+    # to search case insensitively when USER_IFIND_MODE is 'nocase_collation'.
+    email = db.Column(db.String(255, collation='NOCASE'),
+                      nullable=False, unique=True)
+    email_confirmed_at = db.Column(db.DateTime())
+    password = db.Column(db.String(255), nullable=False, server_default='')
 
-        # Define the relationship to Role via UserRoles
-        roles = db.relationship('Role', secondary='user_roles')
+    # Define the relationship to Role via UserRoles
+    roles = db.relationship('Role', secondary='user_roles')
 
-    # Define the Role data-model
-    class Role(db.Model):
-        __tablename__ = 'roles'
-        id = db.Column(db.Integer(), primary_key=True)
-        name = db.Column(db.String(50), unique=True)
+# Define the Role data-model
+class Role(db.Model):
+    __tablename__ = 'roles'
+    id = db.Column(db.Integer(), primary_key=True)
+    name = db.Column(db.String(50), unique=True)
 
-    # Define the UserRoles association table
-    class UserRoles(db.Model):
-        __tablename__ = 'user_roles'
-        id = db.Column(db.Integer(), primary_key=True)
-        user_id = db.Column(db.Integer(), db.ForeignKey(
-            'users.id', ondelete='CASCADE'))
-        role_id = db.Column(db.Integer(), db.ForeignKey(
-            'roles.id', ondelete='CASCADE'))
+# Define the UserRoles association table
+class UserRoles(db.Model):
+    __tablename__ = 'user_roles'
+    id = db.Column(db.Integer(), primary_key=True)
+    user_id = db.Column(db.Integer(), db.ForeignKey(
+        'users.id', ondelete='CASCADE'))
+    role_id = db.Column(db.Integer(), db.ForeignKey(
+        'roles.id', ondelete='CASCADE'))
 
-    # Setup Flask-User and specify the User data-model
-    user_manager = UserManager(app, db, User)
+class UserDetail(db.Model):
+    __tablename__ = 'user_detail'
+    id = db.Column(db.Integer(), primary_key=True)
+    # User information
+    first_name = db.Column(db.String(100, collation='NOCASE'), nullable=False, server_default='')
+    last_name = db.Column(db.String(100, collation='NOCASE'), nullable=False, server_default='')
+    company_name = db.Column(
+        db.String(100, collation='NOCASE'), nullable=False, server_default='')
+    phoneno = db.Column(
+        db.String(100, collation='NOCASE'), nullable=False, server_default='')
+    base_currency = db.Column(db.String(10), nullable=False, server_default='')
+    plan = db.Column(db.String(100, collation='NOCASE'), nullable=False, server_default='free')
+    # payment_received = db.Column(db.Boolean(), nullable = False, server_default = '')
+    user_id = db.Column(db.Integer(), db.ForeignKey('users.id'), nullable=False, unique=True)
+    user = db.relationship('User')
 
-    # Create all database tables
-    db.create_all()
+class Report(db.Model, TimestampMixin):
+    __tablename__ = 'reports'
+    id = db.Column(db.Integer, primary_key=True)
+    time_horizon_days = db.Column(db.Integer, nullable=False, default=7)
+    confidence = db.Column(db.Integer, nullable=False, default=95)
+    pairs_json = db.Column(db.String(1000), db.ForeignKey('users.id'), nullable=False, server_default='[]')
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)    
 
-    # Create 'member@example.com' user with no roles
-    if not User.query.filter(User.email == 'member@example.com').first():
-        user = User(
-            email='member@example.com',
-            email_confirmed_at=datetime.datetime.utcnow(),
-            password=user_manager.hash_password('Password1'),
+def add_detail(user_id, detail):
+    detail = UserDetail(
+        user_id=user_id,
+        first_name=detail['first_name'],
+        last_name=detail['last_name'],
+        company_name=detail['company_name'],
+        phoneno=detail['phoneno'],
+        base_currency=detail['base_currency'],
+        plan=detail['plan'],
+    )
+    db.session.add(detail)
+    db.session.commit()
+
+def add_report(user_id, pairs, time_horizon_days, confidence):
+    report = Report(
+        user_id=user_id,
+        pairs_json=json.dumps(pairs),
+        time_horizon_days=time_horizon_days,
+        confidence=confidence,
+    )
+    db.session.add(report)
+    db.session.commit()
+
+class CustomUserManager(UserManager):
+    def login_view(self):
+        """Prepare and process the login form."""
+
+        # Authenticate username/email and login authenticated users.
+
+        safe_next_url =  self._get_safe_next_url('next', self.USER_AFTER_LOGIN_ENDPOINT)
+
+        # Immediately redirect already logged in users
+        if self.call_or_get(current_user.is_authenticated) and self.USER_AUTO_LOGIN_AT_LOGIN:
+            return redirect(safe_next_url)
+
+        # Initialize form
+        login_form = self.LoginFormClass(request.form)
+
+        if request.method != 'POST':
+            return render_template('login.html')
+        
+        # Retrieve User
+        user = None
+        if self.USER_ENABLE_EMAIL:
+            # Find user by email (with form.email)
+            user, _ = self.db_manager.get_user_and_user_email_by_email(
+                login_form.email.data)
+        if user:
+            safe_next_url = self.make_safe_url(login_form.next.data)
+            return self._do_login_user(user, safe_next_url, True)
+        
+
+    def register_view(self):
+        safe_reg_next = self._get_safe_next_url('reg_next', self.USER_AFTER_REGISTER_ENDPOINT)
+
+        # Immediately redirect already logged in users
+        if self.call_or_get(current_user.is_authenticated) and self.USER_AUTO_LOGIN_AT_LOGIN:
+            return redirect(safe_reg_next)
+
+        # Initialize form
+        register_form = self.RegisterFormClass(request.form)
+        page_number = request.args.get('p') or 1
+
+        if request.method == 'POST':
+            if int(page_number) == 1:
+                user = self.db_manager.add_user()
+                register_form.populate_obj(user)
+                user_email = self.db_manager.add_user_email(
+                    user=user, is_primary=True)
+                register_form.populate_obj(user_email)
+                user.password = self.hash_password(user.password)
+
+                self.db_manager.save_user_and_user_email(user, user_email)
+                self.db_manager.commit()
+                add_detail(user.id, {
+                    'first_name': request.form.getlist('first_name').pop(),
+                    'last_name': request.form.getlist('last_name').pop(),
+                    'company_name': request.form.getlist('company_name').pop(),
+                    'phoneno': request.form.getlist('phoneno').pop(),
+                    'base_currency': request.form.getlist('base_currency').pop(),
+                    'plan': request.form.getlist('plan').pop(),
+                })
+
+                return self._do_login_user(user, safe_reg_next, True)
+
+        return render_template('register.html', currencies=CURRENCIES)
+
+# Setup Flask-User and specify the User data-model
+user_manager = CustomUserManager(app, db, User)
+
+# Create all database tables
+db.create_all()
+
+# Create 'member@example.com' user with no roles
+if not User.query.filter(User.email == 'member@example.com').first():
+    user = User(
+        email='member@example.com',
+        email_confirmed_at=datetime.utcnow(),
+        password=user_manager.hash_password('Password1'),
+    )
+    db.session.add(user)
+    db.session.commit()
+    add_detail(user.id, {
+        'first_name': 'Member',
+        'last_name': 'Member',
+        'company_name': 'Sample Company Inc.',
+        'phoneno': '9090909090',
+        'base_currency': 'GBP',
+        'plan': 'free',
+    })
+
+# Create 'admin@example.com' user with 'Admin' and 'Agent' roles
+if not User.query.filter(User.email == 'admin@example.com').first():
+    user = User(
+        email='admin@example.com',
+        email_confirmed_at=datetime.utcnow(),
+        password=user_manager.hash_password('Password1'),
+    )
+    user.roles.append(Role(name='Admin'))
+    user.roles.append(Role(name='Agent'))
+    db.session.add(user)
+    db.session.commit()
+    db.session.flush()
+    add_detail(user.id, {
+        'first_name': 'Admin',
+        'last_name': 'Admin',
+        'company_name': 'Sample Company Inc.',
+        'phoneno': '9090909090',
+        'base_currency': 'EUR',
+        'plan': 'free',
+    })
+
+def get_raw_pairs(form, files, report_id):
+    if report_id and Report.query.get(report_id):
+        report = Report.query.get(report_id)
+        return (
+            json.loads(report.pairs_json),
+            report.time_horizon_days,
+            report.confidence,
         )
-        db.session.add(user)
-        db.session.commit()
-
-    # Create 'admin@example.com' user with 'Admin' and 'Agent' roles
-    if not User.query.filter(User.email == 'admin@example.com').first():
-        user = User(
-            email='admin@example.com',
-            email_confirmed_at=datetime.datetime.utcnow(),
-            password=user_manager.hash_password('Password1'),
-        )
-        user.roles.append(Role(name='Admin'))
-        user.roles.append(Role(name='Agent'))
-        db.session.add(user)
-        db.session.commit()
-
-    return app
-
-def get_raw_pairs(form, files):
+    
     if 'exposures_csv' not in files:
         return []
     
     file = files['exposures_csv']
     rows = [ line.decode("utf-8").split(',') for line in file.read().splitlines() ]
     file.close()
-    
-    if len(rows) > 0:
-        return [
-            [
-                r[0].strip(), 
-                r[1].strip(), 
-                int(r[2].strip()),
-            ] for r in rows
-        ]
-    else:
-        return list(map(
-            lambda x: [x[0].strip(), x[1].strip(), int(x[2].strip())],
-            zip(
-                form.getlist('short[]'),
-                form.getlist('long[]'),
-                form.getlist('amount[]'),
-            )
-        ))
-    
-
-def handle_report(form, files):
-    raw_pairs = get_raw_pairs(form, files)
-    print(raw_pairs)
-    pairs = list(filter(lambda x: x[0] in CURRENCIES and x[1] in CURRENCIES, raw_pairs))
 
     n = int(form.getlist('time_horizon').pop())
     confidence = float(form.getlist('confidence').pop())
+    
+    if len(rows) > 0:
+        return (
+            [
+                [
+                    r[0].strip(),
+                    r[1].strip(),
+                    int(r[2].strip()),
+                ] for r in rows
+            ],
+            n,
+            confidence,
+        )
+    else:
+        return (
+            list(map(
+                lambda x: [x[0].strip(), x[1].strip(), int(x[2].strip())],
+                zip(
+                    form.getlist('short[]'),
+                    form.getlist('long[]'),
+                    form.getlist('amount[]'),
+                )
+            )),
+            n,
+            confidence,
+        )
+    
+
+def handle_report(form, files, report_id, user_id):
+    raw_pairs, n, confidence = get_raw_pairs(form, files, report_id)
+    print(raw_pairs)
+    pairs = list(filter(lambda x: x[0] in CURRENCIES and x[1] in CURRENCIES, raw_pairs))
+
+    if not report_id:
+        add_report(user_id, pairs, n, confidence)
 
     results = list(zip(
         list(map(lambda p: f"{p[0]}-{p[1]}", pairs)),
@@ -212,35 +367,35 @@ def handle_report(form, files):
         f"{round(var.get_portfolio_var(pairs, 7, confidence), 3):,}",
         "100%",
     )]
-    benefit_abs = f"{round((
+    benefit_abs = round((
         abs(sum(var.get_n_day_individual_vars(pairs, 7, 0.95))) - var.get_portfolio_var(pairs, 7, 0.95)),
         3
-    ):,}"
-    benefit_percent = f"{round((
+    )
+    benefit_percent = round((
         abs(sum(var.get_n_day_individual_vars(pairs, 7, 0.95))) - var.get_portfolio_var(pairs, 7, 0.95)),
         3
-    ):,}"
+    )
 
     return {
         'results': results,
-        'benefit_abs': benefit_abs,
-        'benefit_percent': benefit_percent,
+        'benefit_abs': f"{benefit_abs:,}",
+        'benefit_percent': f"{benefit_percent:,}",
         'confidence': format(confidence*100, '.0f')+"%",
         'currencies': CURRENCIES,
     }
 
-def add_routes(app):
+def add_routes():
     """ Add Routes to Flask App """
 
     # The Home page is accessible to anyone
     @app.route('/admin')
-    @roles_required('Admin')
+    @roles_required(['Admin', 'Agent'])
     def home_page():
         return render_template('./admin/home.html')
 
     # The Members page is only accessible to authenticated users
     @app.route('/admin/members')
-    @login_required    # Use of @login_required decorator
+    @roles_required(['Admin', 'Agent'])   # Use of @login_required decorator
     def member_page():
         return render_template('./admin/members.html')
 
@@ -266,19 +421,36 @@ def add_routes(app):
         c = CurrencyRates()
         rates = list(c.get_rates('USD'))
         return render_template('./register.html', rates=rates)
+    
+    @app.route('/payment')
+    @login_required
+    def payment_page():
+        user = User.query.filter_by(email=current_user.email).first()
+        detail = UserDetail.query.filter_by(user_id=user.id).first()
+        if detail.plan == 'free':
+            return redirect('/enter-exposure')
+        
+        return render_template('./payment.html')
 
     @app.route('/enter-exposure')
+    @login_required
     def enter_exposure_page():
-        c = CurrencyRates()
-        rates = list(c.get_rates('USD'))
         return render_template('./exposures.html', currencies=CURRENCIES)
 
-    @app.route('/report', methods=['POST'])
+    @app.route('/report', methods=['GET', 'POST'])
+    @login_required
     def report_page():
+        user = User.query.filter_by(email=current_user.email).first()
+        if request.method == 'POST':
+            return render_template(
+                './report.html',
+                **handle_report(request.form, request.files, None, user.id),
+            )
+        report = Report.query.get_or_404(request.args.get('id'))
         return render_template(
             './report.html',
-            **handle_report(request.form, request.files),
-        )   
+            **handle_report(request.form, request.files, report.id, user.id),
+        )
 
     @app.route('/suggestion-tool')
     def suggestion_tool_page():
@@ -286,36 +458,30 @@ def add_routes(app):
         return render_template('./suggestion_tool.html', number=int(number))
 
     @app.route('/account')
+    @login_required
     def account_page():
-        return render_template('./account.html', rates=[])
+        user = User.query.filter_by(email=current_user.email).first()
+        detail = UserDetail.query.filter_by(user_id=user.id).first()
+        reports = Report.query.filter_by(user_id=user.id).all()
+        for i in range(len(reports)):
+            reports[i].created = reports[i].created.strftime("%A, %d-%b-%Y %H:%M:%S GMT%z")
+        return render_template(
+            './account.html',
+            email=current_user.email,
+            first_name=detail.first_name,
+            last_name=detail.last_name,
+            company_name=detail.company_name,
+            base_currency=detail.base_currency,
+            plan=detail.plan,
+            reports=reports,
+        )
 
     @app.route('/')
     def index():
         return render_template('./splash.html')
 
-    return app
-
-
-def create_app():
-    """ Flask application factory """
-
-    # Create Flask app load app.config
-    app = Flask(__name__)
-    app.config.from_object(__name__+'.ConfigClass')
-
-    # Initialize Flask-BabelEx
-    babel = Babel(app)
-
-    # Setup Flask DB
-    add_models(app)
-
-    # Setup Flask Server Routes
-    add_routes(app)
-
-    return app
-
-
 # Start development web server
 if __name__ == '__main__':
-    app = create_app()
+    # Setup Flask Server Routes
+    add_routes()
     app.run(host='0.0.0.0', port=5000, debug=True)
