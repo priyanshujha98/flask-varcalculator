@@ -145,7 +145,7 @@ class UserDetail(db.Model):
         db.String(100, collation='NOCASE'), nullable=False, server_default='')
     base_currency = db.Column(db.String(10), nullable=False, server_default='')
     plan = db.Column(db.String(100, collation='NOCASE'), nullable=False, server_default='free')
-    # payment_received = db.Column(db.Boolean(), nullable = False, server_default = '')
+    # last_payment_at = db.Column(db.DateTime)
     user_id = db.Column(db.Integer(), db.ForeignKey('users.id'), nullable=False, unique=True)
     user = db.relationship('User')
 
@@ -178,6 +178,13 @@ def add_report(user_id, pairs, time_horizon_days, confidence):
         confidence=confidence,
     )
     db.session.add(report)
+    db.session.commit()
+
+def add_payment(user_email):
+    user = User.query.filter_by(email=user_email).first()
+    detail = UserDetail.query.get(user.id)
+    detail.last_payment_at = datetime.utcnow
+    db.session.add(detail)
     db.session.commit()
 
 class CustomUserManager(UserManager):
@@ -221,26 +228,25 @@ class CustomUserManager(UserManager):
         page_number = request.args.get('p') or 1
 
         if request.method == 'POST':
-            if int(page_number) == 1:
-                user = self.db_manager.add_user()
-                register_form.populate_obj(user)
-                user_email = self.db_manager.add_user_email(
-                    user=user, is_primary=True)
-                register_form.populate_obj(user_email)
-                user.password = self.hash_password(user.password)
+            user = self.db_manager.add_user()
+            register_form.populate_obj(user)
+            user_email = self.db_manager.add_user_email(
+                user=user, is_primary=True)
+            register_form.populate_obj(user_email)
+            user.password = self.hash_password(user.password)
 
-                self.db_manager.save_user_and_user_email(user, user_email)
-                self.db_manager.commit()
-                add_detail(user.id, {
-                    'first_name': request.form.getlist('first_name').pop(),
-                    'last_name': request.form.getlist('last_name').pop(),
-                    'company_name': request.form.getlist('company_name').pop(),
-                    'phoneno': request.form.getlist('phoneno').pop(),
-                    'base_currency': request.form.getlist('base_currency').pop(),
-                    'plan': request.form.getlist('plan').pop(),
-                })
+            self.db_manager.save_user_and_user_email(user, user_email)
+            self.db_manager.commit()
+            add_detail(user.id, {
+                'first_name': request.form.getlist('first_name').pop(),
+                'last_name': request.form.getlist('last_name').pop(),
+                'company_name': request.form.getlist('company_name').pop(),
+                'phoneno': request.form.getlist('phoneno').pop(),
+                'base_currency': request.form.getlist('base_currency').pop(),
+                'plan': request.form.getlist('plan').pop(),
+            })
 
-                return self._do_login_user(user, safe_reg_next, True)
+            return self._do_login_user(user, safe_reg_next, False)
 
         return render_template('register.html', currencies=CURRENCIES)
 
@@ -364,15 +370,15 @@ def handle_report(form, files, report_id, user_id):
         "-",
         f"{round(sum([p[2] for p in pairs]), 3):,}",
         f"{round(abs(sum(var.get_n_day_individual_vars(pairs, n, confidence))), 3):,}",
-        f"{round(var.get_portfolio_var(pairs, 7, confidence), 3):,}",
+        f"{round(var.get_portfolio_var(pairs, n, confidence), 3):,}",
         "100%",
     )]
     benefit_abs = round((
-        abs(sum(var.get_n_day_individual_vars(pairs, 7, 0.95))) - var.get_portfolio_var(pairs, 7, 0.95)),
+        abs(sum(var.get_n_day_individual_vars(pairs, n, confidence))) - var.get_portfolio_var(pairs, 7, confidence)),
         3
     )
     benefit_percent = round((
-        abs(sum(var.get_n_day_individual_vars(pairs, 7, 0.95))) - var.get_portfolio_var(pairs, 7, 0.95)),
+        abs(sum(var.get_n_day_individual_vars(pairs, n, confidence))) - var.get_portfolio_var(pairs, 7, confidence)),
         3
     )
 
@@ -382,6 +388,98 @@ def handle_report(form, files, report_id, user_id):
         'benefit_percent': f"{benefit_percent:,}",
         'confidence': format(confidence*100, '.0f')+"%",
         'currencies': CURRENCIES,
+    }
+
+def handle_suggestions(report_id, scenario_id):
+    report = Report.query.get(report_id)
+    pairs, n, confidence = json.loads(
+        report.pairs_json), report.time_horizon_days, report.confidence
+    current_var = f"{round(var.get_portfolio_var(pairs, n, confidence), 3):,}"
+
+    component_vars = var.get_n_day_component_vars(pairs, n, confidence)
+    sorted_component_vars = sorted(enumerate(component_vars), key=lambda x: x[1], reverse=True)
+    
+    scenarios = []
+    var_reductions = []
+    if len(pairs) >= 1:
+        scenarios.append([
+            [
+                pairs[i][1],
+                pairs[i][0],
+                pairs[i][2] if i == sorted_component_vars[0][0] else 0,
+                f"{n} Days",
+            ]
+            for i in range(len(pairs))
+        ])
+        var_reductions.append(sorted_component_vars[0][1])
+    if len(pairs) >= 2:
+        scenarios.append([
+            [
+                pairs[i][1],
+                pairs[i][0],
+                sum([
+                    pairs[i][2]*1 if i == sorted_component_vars[1][0] else 0,
+                    pairs[i][2] * 0.5 if i == sorted_component_vars[0][0] else 0,
+                ]),
+                f"{n} Days",
+            ]
+            for i in range(len(pairs))
+        ])
+        var_reductions.append(sum([
+            sorted_component_vars[1][1]*1,
+            sorted_component_vars[0][1]*0.5,
+        ]))
+    if len(pairs) >= 3:
+        scenarios.append([
+            [
+                pairs[i][1],
+                pairs[i][0],
+                sum([
+                    pairs[i][2] * 1 if i == sorted_component_vars[2][0] else 0,
+                    pairs[i][2] * 0.5 if i == sorted_component_vars[1][0] else 0,
+                    pairs[i][2] * 0.5 if i == sorted_component_vars[0][0] else 0,
+                ]),
+                f"{n} Days",
+            ]
+            for i in range(len(pairs))
+        ])
+        var_reductions.append(sum([
+            sorted_component_vars[2][1]*1,
+            sorted_component_vars[1][1]*0.5,
+            sorted_component_vars[0][1]*0.5,
+        ]))
+    if len(pairs) >= 4:
+        scenarios.append([
+            [
+                pairs[i][1],
+                pairs[i][0],
+                sum([
+                    pairs[i][2] * 1 if i == sorted_component_vars[3][0] else 0,
+                    pairs[i][2] * 0.5 if i == sorted_component_vars[2][0] else 0,
+                    pairs[i][2] * 0.5 if i == sorted_component_vars[1][0] else 0,
+                    pairs[i][2] * 0.5 if i == sorted_component_vars[0][0] else 0,
+                ]),
+                f"{n} Days",
+            ]
+            for i in range(len(pairs))
+        ])
+        var_reductions.append(sum([
+            sorted_component_vars[3][1] * 1,
+            sorted_component_vars[2][1] * 0.5,
+            sorted_component_vars[1][1] * 0.5,
+            sorted_component_vars[0][1] * 0.5,
+        ]))
+    var_reductions = [f"{round(x, 3):,}" for x in var_reductions]
+    diffs = [f"{round(float(current_var)-float(v), 3):,}" for v in var_reductions]
+
+    return {
+        'report_id': report_id,
+        'scenario': int(scenario_id),
+        'scenarios': scenarios,
+        'total_scenarios': len(scenarios),
+        'current_var': current_var,
+        'var_reductions': var_reductions,
+        'diffs': diffs,
     }
 
 def add_routes():
@@ -418,22 +516,30 @@ def add_routes():
 
     @app.route('/register')
     def register_page():
-        c = CurrencyRates()
-        rates = list(c.get_rates('USD'))
-        return render_template('./register.html', rates=rates)
+        return render_template('./register.html')
     
     @app.route('/payment')
-    @login_required
+    # @login_required
     def payment_page():
+        PP_CLIENT_ID = "AQnE3_uZrT1Vf56AluXZIR1ir4gUYWAMmxquNRnRzGSVukHeGPzUvu5WsW4FtdYhqrHO06IQkKTr8zOh"
         user = User.query.filter_by(email=current_user.email).first()
         detail = UserDetail.query.filter_by(user_id=user.id).first()
-        if detail.plan == 'free':
+        plan, last_payment_at = detail.plan, detail.last_payment_at
+        plan_id = ''
+        if plan == 'free':
             return redirect('/enter-exposure')
-        
-        return render_template('./payment.html')
+        if plan == 'premium':
+            plan_id = 'P-6WL802942Y8719627L4PXXFY'
+        elif plan == 'business':
+            plan_id = 'P-306056489A234290WL4PXXLI'
+        return render_template('./payment.html', plan_id=plan_id, PP_CLIENT_ID=PP_CLIENT_ID)
+    
+    @app.route('/payment-complete')
+    def payment_complete_page():
+        add_payment(current_user.email)
+        return redirect('/enter-exposure')
 
     @app.route('/enter-exposure')
-    @login_required
     def enter_exposure_page():
         return render_template('./exposures.html', currencies=CURRENCIES)
 
@@ -454,8 +560,15 @@ def add_routes():
 
     @app.route('/suggestion-tool')
     def suggestion_tool_page():
-        number = request.args.get('number') or 1
-        return render_template('./suggestion_tool.html', number=int(number))
+        user = User.query.filter_by(email=current_user.email).first()
+        reports = Report.query.filter_by(user_id=user.id).all()
+        report_id = request.args.get('report_id') or reports.pop().id
+        scenario = request.args.get('scenario') or 1
+
+        return render_template(
+            './suggestion_tool.html', 
+            **handle_suggestions(report_id, scenario),
+        )
 
     @app.route('/account')
     @login_required
