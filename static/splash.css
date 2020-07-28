@@ -23,6 +23,6 @@
     display: flex;
     flex-flow: column;
     justify-content: space-between;
-    height: 80%;
-    margin-top: 10%;
+    height: 65vh;
+    margin-top: 5vh;
 }

@@ -1,0 +1,29 @@
+{% extends 'base_page.html' %}
+
+{% block content %}
+<div class="step active" id="step1">
+  <h3>Login</h3>
+  <form class="form-wrapper" action="" method="POST">
+    <div class="form-field full">
+      <label for="email">Email ID</label>
+      <input class="element-border" type="email" id="email" name="email" placeholder="abc@example.com"
+        autocomplete="email" required />
+    </div>
+    <div class="form-field full">
+      <label for="password">Password</label>
+      <input class="element-border" type="password" id="password" name="password" placeholder="********"
+        autocomplete="password" required />
+    </div>
+    <div class="form-field full">
+      <label for="remember_me">
+        <input class="element-border" type="checkbox" id="remember_me" name="remember_me" />
+        Remember Me
+      </label>
+      
+    </div>
+    <button type='submit' class="btn btn-brown btn-solid full">Sign In</button>
+    <br /><br />
+    <a href="/register">Don't have an account? Register here</a>
+  </form>
+</div>
+{% endblock %}

@@ -21,6 +21,8 @@ a.img-icon img{
     display: flex;
     justify-content: space-between;
     padding: 0 30px;
+    height: 10vh;
+    top: 0;
 }
 
 .navigation-wrapper .icon-wrapper{
@@ -43,7 +45,14 @@ a.img-icon img{
     background-color: #fff9f9;
     border-top-left-radius: 50px;
     border-top-right-radius: 50px;
-    padding: 50px 30px;
+    padding: 1rem 4rem 2rem 4rem;
+    height: 80vh;
+    overflow-y: scroll;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+.main-content::-webkit-scrollbar{
+    display: none;
 }
 
 .step{
@@ -97,7 +106,6 @@ table input{
 }
 
 .previous-reports li{
-    display: flex;
     justify-content: space-between;
     margin: 5px 0;
 }

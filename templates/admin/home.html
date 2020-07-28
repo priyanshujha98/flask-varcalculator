@@ -1,0 +1,42 @@
+{% extends "admin_layout.html" %}
+
+{% block content %}
+<div class="row">
+  <div class="col-6 text-center">
+    <h3>Time Horizon</h3>
+    <ul class="list-group">
+      {% for each in [7, 14, 30, 60, 90, 120, 180, 365] %}
+      <li class="list-group-item">{{ each }} Days</li>
+      {% endfor %}
+      <li class="list-group-item">
+        <div class="row align-items-center">
+          <div class="col-6">
+            <input type="number" id="new_time_horizon" name="new_time_horizon" placeholder="Days" />
+          </div>
+          <div class="col-6">
+            <button class="btn bg-primary text-white">Add New Time Horizon</button>
+          </div>
+        </div>
+      </li>
+    </ul>
+  </div>
+  <div class="col-6 text-center">
+    <h3>Confidence Level</h3>
+    <ul class="list-group">
+      {% for each in [95, 90, 85, 80] %}
+      <li class="list-group-item">{{ each }}%</li>
+      {% endfor %}
+      <li class="list-group-item">
+        <div class="row align-items-center">
+          <div class="col-6">
+            <input type="number" id="new_time_horizon" name="new_time_horizon" placeholder="%" />
+          </div>
+          <div class="col-6">
+            <button class="btn bg-primary text-white">Add New Confidence Level</button>
+          </div>
+        </div>
+      </li>
+    </ul>
+  </div>
+</div>
+{% endblock %}

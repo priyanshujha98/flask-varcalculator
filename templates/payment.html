@@ -1,0 +1,46 @@
+{% extends 'base_page.html' %}
+
+{% block header_scripts %}
+<script src="https://www.paypal.com/sdk/js?client-id={{ PP_CLIENT_ID }}&vault=true"> // Required. Replace SB_CLIENT_ID with your sandbox client ID.
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="step active" id="step1">
+    <!-- <a href="#" class="float-left text-theme" onclick="showStep('step2')">
+        <img src="./static/images/arrow-left.png" alt="" />
+    </a>
+    <strong class="float-right text-theme">3/3</strong> -->
+    <br />
+    <h3>Enter Payment Info</h3>
+    <br /><br />
+    <div class="full">
+        <div id="paypal-button-container"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // This function displays Smart Payment Buttons on your web page.
+    paypal.Buttons({
+        vault: true,
+        createSubscription: function (data, actions) {
+            // This function sets up the details of the transaction, including the amount and line item details.
+            return actions.subscription.create({
+                'vault': true,
+                'plan_id': "{{ plan_id }}"
+            });
+        },
+        onApprove: function (data, actions) {
+            // This function captures the funds from the transaction.
+            actions.redirect(window.origin+'/payment-complete')
+            return actions.order.capture()
+        },
+        onCancel: function (data) {
+            // Show a cancel page, or return to cart
+            alert('Failed payment, please reload and try again');
+        },
+    }).render('#paypal-button-container');
+</script>
+{% endblock %}
