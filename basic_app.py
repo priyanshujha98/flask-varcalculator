@@ -349,11 +349,11 @@ def handle_report(form, files, report_id, user_id):
         list(map(lambda p: p[1], pairs)),
         list(map(lambda p: f"{p[2]:,}", pairs)),
         list(map(
-            lambda x: f"{round(abs(x), 3):,}", var.get_n_day_individual_vars(
+            lambda x: f"{round(abs(x), 0):,}", var.get_n_day_individual_vars(
                 pairs, n, confidence)
         )),
         list(map(
-            lambda x: f"{round(x, 3):,}", var.get_n_day_component_vars(
+            lambda x: f"{round(x, 0):,}", var.get_n_day_component_vars(
                 pairs, n, confidence)
         )),
         list(map(
@@ -363,18 +363,18 @@ def handle_report(form, files, report_id, user_id):
     )) + [(
         "Total",
         "-",
-        f"{round(sum([p[2] for p in pairs]), 3):,}",
-        f"{round(abs(sum(var.get_n_day_individual_vars(pairs, n, confidence))), 3):,}",
-        f"{round(var.get_portfolio_var(pairs, n, confidence), 3):,}",
+        f"{round(sum([p[2] for p in pairs]), 0):,}",
+        f"{round(abs(sum(var.get_n_day_individual_vars(pairs, n, confidence))), 0):,}",
+        f"{round(var.get_portfolio_var(pairs, n, confidence), 0):,}",
         "100%",
     )]
     benefit_abs = round((
         abs(sum(var.get_n_day_individual_vars(pairs, n, confidence))) - var.get_portfolio_var(pairs, 7, confidence)),
-        3
+        0
     )
     benefit_percent = round((
         abs(sum(var.get_n_day_individual_vars(pairs, n, confidence))) - var.get_portfolio_var(pairs, 7, confidence)),
-        3
+        0
     )
 
     return {
@@ -389,7 +389,7 @@ def handle_suggestions(report_id, scenario_id):
     report = Report.query.get(report_id)
     pairs, n, confidence = json.loads(
         report.pairs_json), report.time_horizon_days, report.confidence
-    current_var = f"{round(var.get_portfolio_var(pairs, n, confidence), 3):,}"
+    current_var = f"{round(var.get_portfolio_var(pairs, n, confidence), 0):,}"
 
     component_vars = var.get_n_day_component_vars(pairs, n, confidence)
     sorted_component_vars = sorted(enumerate(component_vars), key=lambda x: x[1], reverse=True)
@@ -464,8 +464,8 @@ def handle_suggestions(report_id, scenario_id):
             sorted_component_vars[1][1] * 0.5,
             sorted_component_vars[0][1] * 0.5,
         ]))
-    var_reductions = [f"{round(x, 3):,}" for x in var_reductions]
-    diffs = [f"{round(float(current_var)-float(v), 3):,}" for v in var_reductions]
+    var_reductions = [f"{round(x, 0):,}" for x in var_reductions]
+    diffs = [f"{round(float(current_var)-float(v), 0):,}" for v in var_reductions]
 
     return {
         'report_id': report_id,
