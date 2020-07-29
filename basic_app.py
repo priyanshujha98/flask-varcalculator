@@ -143,7 +143,6 @@ class UserDetail(db.Model):
         db.String(100, collation='NOCASE'), nullable=False, server_default='')
     phoneno = db.Column(
         db.String(100, collation='NOCASE'), nullable=False, server_default='')
-    base_currency = db.Column(db.String(10), nullable=False, server_default='')
     plan = db.Column(db.String(100, collation='NOCASE'), nullable=False, server_default='free')
     # last_payment_at = db.Column(db.DateTime)
     user_id = db.Column(db.Integer(), db.ForeignKey('users.id'), nullable=False, unique=True)
@@ -163,8 +162,7 @@ def add_detail(user_id, detail):
         first_name=detail['first_name'],
         last_name=detail['last_name'],
         company_name=detail['company_name'],
-        phoneno=detail['phoneno'],
-        base_currency=detail['base_currency'],
+        phoneno=detail['phoneno'], 
         plan=detail['plan'],
     )
     db.session.add(detail)
@@ -241,8 +239,7 @@ class CustomUserManager(UserManager):
                 'first_name': request.form.getlist('first_name').pop(),
                 'last_name': request.form.getlist('last_name').pop(),
                 'company_name': request.form.getlist('company_name').pop(),
-                'phoneno': request.form.getlist('phoneno').pop(),
-                'base_currency': request.form.getlist('base_currency').pop(),
+                'phoneno': request.form.getlist('phoneno').pop(), 
                 'plan': request.form.getlist('plan').pop(),
             })
 
@@ -270,7 +267,6 @@ if not User.query.filter(User.email == 'member@example.com').first():
         'last_name': 'Member',
         'company_name': 'Sample Company Inc.',
         'phoneno': '9090909090',
-        'base_currency': 'GBP',
         'plan': 'free',
     })
 
@@ -291,7 +287,6 @@ if not User.query.filter(User.email == 'admin@example.com').first():
         'last_name': 'Admin',
         'company_name': 'Sample Company Inc.',
         'phoneno': '9090909090',
-        'base_currency': 'EUR',
         'plan': 'free',
     })
 
@@ -584,7 +579,6 @@ def add_routes():
             first_name=detail.first_name,
             last_name=detail.last_name,
             company_name=detail.company_name,
-            base_currency=detail.base_currency,
             plan=detail.plan,
             reports=reports,
         )
