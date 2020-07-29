@@ -201,23 +201,25 @@
         },
         series: [{
             type: 'column',
-            name: 'Contribution To Risk',
-            data: contributions,
+            name: 'Component VaR',
+            data: component_vars,
         }, {
             type: 'column',
             name: 'Individual VaR',
             data: individual_vars,
-        }, {
-            type: 'spline',
-            name: 'Component VaR',
-            data: component_vars,
-            marker: {
-                lineWidth: 2,
-                lineColor: Highcharts.getOptions().colors[3],
-                fillColor: 'white'
-            },
-            label: []
-        }]
+        }
+        // , {
+        //     type: 'spline',
+        //     name: 'Component VaR',
+        //     data: component_vars,
+        //     marker: {
+        //         lineWidth: 2,
+        //         lineColor: Highcharts.getOptions().colors[3],
+        //         fillColor: 'white'
+        //     },
+        //     label: []
+        // }
+    ]
     });
 </script>
 <script type="text/javascript">
