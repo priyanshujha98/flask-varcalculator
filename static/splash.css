@@ -13,6 +13,7 @@
     background-size: cover;
     background-repeat: no-repeat;
     pointer-events: none;
+    z-index: 0;
 }
 
 .splash .page-wrapper{
@@ -25,4 +26,15 @@
     justify-content: space-between;
     height: 65vh;
     margin-top: 5vh;
+    z-index:1;
+}
+
+.question{
+    text-decoration: underline;
+    margin-bottom: 0;
+}
+
+.splash ul{
+    list-style-type: disc;
+    padding-left: 15px;
 }

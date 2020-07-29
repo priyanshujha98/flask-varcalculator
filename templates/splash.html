@@ -10,11 +10,31 @@
         <div class="page-content">
             <a href="#" class="logo text-center"><img src="./static/images/logo.png" alt="FX Risk App" /></a>
             <h1 class="text-center">Welcome to FX Risk App</h1>
-            <p class="text-center">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem
-                Ipsum
-                has been the
-                industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and
-                scrambled it to make a type specimen book. It has survived not only five centuries,</p>
+            <h5 class="text-center">FX Risk App brings you the same advanced methodology used by the world’s largest banks to protect their currency portfolio from huge losses!</h5>
+            <p class="text-left mb-0">Do you trade Forex?</p>
+            <p class="text-left mb-0">Do you know what your worst-case scenario loss is?</p>
+            <p class="text-left mb-0">How much risk is in your portfolio?</p>
+            <p class="text-left">Does your portfolio have currency pairs that naturally offset risk?</p>
+            <div class="text-center">
+                <!-- Replace this section with real pricing plans in Register page -->
+                <p>&gt;&gt;&gt;&gt;&gt;&gt;ADD PRICING PLANS AND COMPARISON &lt;&lt;&lt;&lt;&lt;&lt;</p>
+            </div>
+            <div class="text-left">
+                <p class="question">What is VaR? </p>
+                <p>According to Investopedia, Value at risk (VaR) is a statistic that measures and quantifies the level of financial risk within a firm, portfolio or position over a specific time frame. This metric is most commonly used by investment and commercial banks to determine the extent and occurrence ratio of potential losses in their institutional portfolios.</p>
+                <p class="question">How Does FX Risk App calculate VaR?</p>
+                <p>Our sophisticated algorithm examines 7 years of historical rate movements to identify trends and correlations based on the criteria and parameters input: currency pairs, amounts, time period, and confidence levels to give you a worst-case scenario of how much your portfolio could lose.</p>
+                <p class="question">Does FX Risk App recommend trades to offset your risk?</p>
+                <p>Yes!  Our premium package recommends trades and provides scenarios for you to significantly lower the risk in your portfolio.</p>
+
+
+                <p>Use our free tool to answer the following questions:</p>
+                <ul>
+                    <li>If I hold positions currency pairs A, B and C, etc. how much value could I lose within the next 7 days, 14 days, 1 month, 3 months, 6 months, 1 year, 2 years?</li>
+                    <li>If I close position B, how will that change my overall risk?</li>
+                    <li>What position can I add to my portfolio to lower my overall risk?</li>
+                </ul>
+            </div>
             {% if current_user.is_authenticated %}
             <a href="{{ url_for('enter_exposure_page') }}" class="btn btn-solid btn-brown">Continue</a>
             {% else %}

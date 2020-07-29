@@ -589,6 +589,12 @@ def add_routes():
             reports=reports,
         )
 
+    @app.route('/contact')
+    def contact_page():        
+        return render_template(
+            './contact.html'            
+        )
+
     @app.route('/')
     def index():
         return render_template('./splash.html')

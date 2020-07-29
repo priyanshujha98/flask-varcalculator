@@ -255,3 +255,11 @@ ul{
     list-style-type: none;
     padding-left: 0;
 }
+
+.brown-color{
+    color: #af2318;
+}
+
+#logout_btn{
+    margin-left: 10px;
+}
