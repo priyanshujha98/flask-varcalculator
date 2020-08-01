@@ -1,129 +1,365 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends 'base_page.html' %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta content="IE=edge" http-equiv="X-UA-Compatible">
-    <meta content="width=device-width,initial-scale=1" name="viewport">
-    <meta content="description" name="description">
-    <meta http-equiv="ScreenOrientation" content="autoRotate:disabled">
-    <meta name="google" content="notranslate" />
+{% block content %}
+<div class="step active" id="step1">
+    <h3 class="mb-2">Reports</h3>
 
-    <!-- Disable tap highlight on IE -->
-    <meta name="msapplication-tap-highlight" content="no">
-
-    <link rel="apple-touch-icon" sizes="180x180" href="./static/assets/apple-icon-180x180.png">
-    <link href="./static/images/favicon.png" rel="icon">
-
-    <title>Welcome to FX Risk App</title>
-    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
-    <link href="./static/frontend.css" rel="stylesheet">
-    <link href="./static/main.css" rel="stylesheet">
-</head>
-
-<body class="register">
-    <div class="page-wrapper">
-        <div class="header">
-            <a href="#" class="logo text-center"><img src="./static/images/white-logo.png" alt="FX Risk App" /></a>
-            <a href="#" class="img-icon">
-                <img src="./static/images/user.png" alt="Account" />
-                <span>Account</span>
+    <div class="mr-3 border border-theme bg-white rounded-pill float-right row">
+        <span class="col-6 pill-left">
+            <a href="#" class="text-theme img-icon" onclick="showStep('step2')">
+                <strong>Chart</strong>
             </a>
-        </div>
-        <div class="page-content">  
-        <div class="navigation-wrapper">
-            <a href="#" class="img-icon">
-                <div class="icon-wrapper"><img src="./static/images/home.png" alt="Account" /></div>
-                <span>Home</span>
-            </a>
-            <a href="#" class="img-icon">
-                <div class="icon-wrapper"><img src="./static/images/enter.png" alt="Account" /></div>
-                <span>Enter Details</span>
-            </a>
-            <a href="#" class="img-icon">
-                <div class="icon-wrapper"><img src="./static/images/reports-selected.png" alt="Account" /></div>
-                <span>Reports</span>
-            </a>
-            <a href="#" class="img-icon">
-                <div class="icon-wrapper"><img src="./static/images/suggestion.png" alt="Account" /></div>
-                <span>Suggestion Tool</span>
-            </a>
-            <a href="#" class="img-icon">
-                <div class="icon-wrapper"><img src="./static/images/about.png" alt="Account" /></div>
-                <span>About</span>
-            </a>
-        </div>
-        <div class="main-content">
-            <div class="step active" id="step1">
-                <h3>Enter Exposure</h3>
-                <div class="form-wrapper">
-                    <div class="exposure-table">
-                        <table id="exposure-table">
-                            <thead>
-                                <tr>
-                                    <td>Short Currency</td>
-                                    <td>Long Currency</td>
-                                    <td>Amount In Base Currency (USD)</td>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>
-                                        <select name="short[]">
-                                            {% for each in rates %}
-                                                <option val={{ each }}>{{each}}</option>
-                                            {% endfor %}
-                                        </select>
-                                    </td>
-                                    <td>
-                                        <select name="long[]">
-                                            {% for each in rates %}
-                                                <option val={{ each }}>{{each}}</option>
-                                            {% endfor %}
-                                        </select>
-                                    </td>
-                                    <td>
-                                        <input type="number" name="amount[]">
-                                    </td>
-                                </tr>                                
-                            </tbody>
-                        </table>
-                        <input type="hidden" id="exposure_row_hidden" value='<tr><td><select name="short[]">{% for each in rates %}<option val={{ each }}>{{each}}</option>{% endfor %}</select></td><td><select name="long[]">{% for each in rates %}<option val={{ each }}>{{each}}</option>{% endfor %}</select></td><td><input type="number" name="amount[]"></td></tr>' />
-                    </div>
-                    <div class="half first"><a href="#" class="btn btn-brown btn-outline full" onclick="addExposureRow()"><img src="./static/images/plus.png" alt="Save"/>Add Row</a></div>
-                    <div class="half"><a href="#" class="btn btn-blue btn-solid full">Upload CSV</a></div>                    
-                    <div class="clearfix"></div>
-
-                    <h4>Choose Time Horizon</h4>
-                    <div class="form-field half first">                        
-                        <label for="time_horizon">Time Horizon</label>
-                        <select id="time_horizon" name="time_horizon">
-                            <option val="90days">90 Days</option>
-                            <option val="60days">60 Days</option>
-                            <option val="30days">30 Days</option>
-                        </select>
-                    </div>
-                    <div class="clearfix"></div>
-                    <h4>Choose Confidence Level</h4>
-                    <div class="form-field half first">                        
-                        <label for="confidence_level">Confidence Level</label>
-                        <select id="confidence_level" name="confidence_level">
-                            <option val="95%">95%</option>
-                            <option val="90%">90%</option>
-                            <option val="85%">85%</option>
-                        </select>
-                    </div>
-                    <div class="clearfix"></div>
-                    <div class="half first"><a href="#" class="btn btn-green btn-outline full"><img src="./static/images/save.png" alt="Save"/>Save</a></div>
-                    <div class="half"><a href="#" class="btn btn-brown btn-solid full"><img src="./static/images/calculator-icon.png" alt="Calculate"/>Calculate</a></div>                    
-                </div>
-            </div>            
-        </div>
-        </div>                
+        </span>
+        <span class="col-6 rounded-pill bg-theme text-white"><strong>Table</strong></span>
     </div>
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="./static/script.js"></script>
-</body>
 
-</html>
+    <h5 class="mb-2">VAR (Value at Risk) Report</h5>
+
+    <div class="row">
+        <div class="p-1 col-4 ml-3 rounded-pill bg-theme text-white text-center">
+            <span class="p-2 rounded-pill"><strong>Confidence</strong></span>
+            &nbsp;
+            <span class="p-2 rounded-pill"><strong>{{ confidence }}</strong></span>
+        </div>
+    </div>
+    <br />
+    <table id="exposure-table" class="full">
+        <thead>
+            <tr>
+                <td style="width: 15%;">Currency Pair</td>
+                <td>Exposure Currency</td>
+                <td>Exposure Amount USD Equivalent</td>
+                <td>Invidivdual VaR</td>
+                <td>Component VaR</td>
+                <td>Contribution to Risk</td>
+            </tr>
+        </thead>
+        <tbody>
+            {% for each in results %}
+            <tr>
+                {% for f in each %}
+                <td class="py-3 text-center" style="width: 15%;"><strong>{{ f }}</strong></td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <div class="clearfix"></div>
+    <br />
+    <div class="row">
+        <div class="col-7 text-center">
+            Portfolio Diversification Benefit
+        </div>
+        <div class="col-5">
+            <div class="row mb-2">
+                <div class="col-8 text-center">
+                    <span class="p-1 px-3 rounded-pill bg-theme text-white">Amount</span>
+                </div>
+                <div class="col-4 text-center">
+                    <span class="p-1 px-3 rounded-pill bg-theme text-white">%</span>
+                </div>
+            </div>
+            <div class="divider"></div>
+            <div class="row">
+                <div class="col-8 text-center">
+                    <strong>({{ benefit_abs }})</strong>
+                </div>
+                <div class="col-4 text-center">
+                    <strong>{{ benefit_percent }}%</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+    <br />
+    <div class="container">
+        <div class="rounded-pill border border-lg border-success row">
+            <span class="col-10 rounded-pill bg-success text-white"><strong>Total VaR</strong></span>
+            <span class="col-2 text-success"><strong>{{results[-1][4]}}</strong></span>
+        </div>
+    </div>
+    <br />
+    <a href="#" class="btn btn-brown btn-outline full" onclick="showStep('step3')">
+        View Exposure Heat Map
+    </a>
+</div>
+<div class="step" id="step2">
+    <h3 class="mb-2">Reports</h3>
+
+    <div class="mr-3 border border-theme bg-white rounded-pill float-right row">
+        <span class="col-6 rounded-pill bg-theme text-white">
+            <a href="#" class="img-icon">
+                <strong>Chart</strong>
+            </a>
+        </span>
+        <span class="col-6 text-theme">
+            <a href="#" class="text-theme img-icon" onclick="showStep('step1')">
+                <strong>Table</strong>
+            </a>
+        </span>
+    </div>
+
+    <h5 class="mb-2">VAR (Value at Risk) Report</h5>
+    <div class="clearfix"></div>
+    <br />
+
+    <div id="barchart" class="full bg-transparent"></div>
+    <br />
+
+    <div class="row">
+        <div class="col-3 card element-border text-center">
+            Exposure Amounts
+            <h4>{{ results[-1][2] }}</h4>
+        </div>
+        <div class="col-3 card element-border text-center">
+            Individual <br /> VaR
+            <h4>{{ results[-1][3] }}</h4>
+        </div>
+        <div class="col-3 card element-border text-center">
+            Component VaR
+            <h4>{{ results[-1][4] }}</h4>
+        </div>
+        <div class="col-3 card element-border text-center">
+            Contribution to Risk
+            <h4>100%</h4>
+        </div>
+    </div>
+    <br />
+    <div class="row ">
+        <div class="col-6 text-right">
+            <div class="text-right"><br /></div>
+            <div class="text-right">
+                Portfolio Diversification Benefit
+            </div>
+            <div class="text-right"><strong>Total VaR</strong></div>
+        </div>
+        <div class="col-6">
+            <div class="row">
+                <div class="col-6 text-center">Amount</div>
+                <div class="col-6 text-center">%</div>
+            </div>
+            <div class="row">
+                <div class="col-6 text-center">({{ benefit_abs }})</div>
+                <div class="col-6 text-center">{{ benefit_percent }}</div>
+            </div>
+            <div class="row">
+                <div class="col-6 text-center"><strong>{{ results[-1][4] }}</strong></div>
+            </div>
+        </div>
+    </div>
+    <br />
+    <a href="#" class="btn btn-brown btn-outline full" onclick="showStep('step3')">
+        View Exposure Heat Map
+    </a>
+</div>
+
+<div class="step" id="step3">
+    <h3 class="mb-2">Exposure Heat Map</h3>
+
+    <div id="heatmap" class="border border-theme rounded-lg">
+        <div class="loading">
+            <i class="icon-spinner icon-spin icon-large"></i>
+            Loading data from Google Spreadsheets...
+        </div>
+    </div>
+
+    <br />
+
+    <a href="#" class="btn bg-theme text-white full">
+        View Full Screen
+    </a>
+
+    <br /><br />
+
+    <a href="#" class="btn btn-brown btn-outline full" onclick="showStep('step1')">
+        View VAR Report
+    </a>
+</div>
+
+<script src="https://code.highcharts.com/maps/highmaps.js"></script>
+<script src="https://code.highcharts.com/maps/modules/data.js"></script>
+<script src="https://code.highcharts.com/mapdata/custom/world.js"></script>
+<script src="https://code.highcharts.com/modules/heatmap.js"></script>
+<script src="https://code.highcharts.com/modules/coloraxis.js"></script>
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/modules/series-label.js"></script>
+<script src="https://code.highcharts.com/modules/accessibility.js"></script>
+<script type="text/javascript">
+    const pairs = "{% for each in results %}{{each[0]}},{% endfor %}".split(',').slice(0, -2);
+    const individual_vars = "{% for each in results %}{{each[3]}},{% endfor %}".split(',').slice(0, -2).map(v => Number(v));
+    const component_vars = "{% for each in results %}{{each[4]}},{% endfor %}".split(',').slice(0, -2).map(v => Number(v));
+    const contributions = "{% for each in results %}{{each[5]}},{% endfor %}".split(',').slice(0, -2).map(v => Number(v.replace('%', '')));
+    
+    Highcharts.chart('barchart', {
+        title: {
+            text: 'VaR Report',
+        },
+        chart: {
+            backgroundColor: '#fff9f9',
+        },
+        xAxis: {
+            categories: pairs
+        },
+        series: [{
+            type: 'column',
+            name: 'Component VaR',
+            data: component_vars,
+        }, {
+            type: 'column',
+            name: 'Individual VaR',
+            data: individual_vars,
+        }
+        // , {
+        //     type: 'spline',
+        //     name: 'Component VaR',
+        //     data: component_vars,
+        //     marker: {
+        //         lineWidth: 2,
+        //         lineColor: Highcharts.getOptions().colors[3],
+        //         fillColor: 'white'
+        //     },
+        //     label: []
+        // }
+    ]
+    });
+</script>
+<script type="text/javascript">
+    // possible currency codes
+    const currencyCodes = "{% for c in currencies %}{{ c }},{% endfor %}".split(',');
+    // countries by currency
+    const codeToCountry = {
+        "AUD": ["AUS"],
+        "BRL": ["BRA"],
+        "CAD": ["CAN"],
+        "CHF": ["CHE", "LIE"],
+        "CNY": ["CHN"],
+        "CZK": ["CZE"],
+        "DKK": ["DNK", "FRO", "GRL"],
+        "EUR": ["PRT", "NLD", "FIN", "DEU", "BEL", "LUX", "LTU", "GRC", "AUT", "ESP", "FRA", "ITA"],
+        "GBP": ["GBR"],
+        "HKD": ["HKG"],
+        "HRK": ["HRV"],
+        "HUF": ["HUN"],
+        "IDR": ["IDN"],
+        "ILS": ["ISR"],
+        "INR": ["BTN", "IND"],
+        "ISK": ["ISL"],
+        "JPY": ["JPN"],
+        "KRW": ["KOR"],
+        "MXN": ["MEX"],
+        "MYR": ["MYS"],
+        "NOK": ["NOR"],
+        "NZD": ["NZL"],
+        "PHP": ["PHL"],
+        "PLN": ["POL"],
+        "RON": ["ROU"],
+        "RUB": ["RUS"],
+        "SEK": ["SWE"],
+        "SGD": ["SGP"],
+        "THB": ["THA"],
+        "TRY": ["TUR"],
+        "USD": ["USA"]
+    };
+
+    // sample data we should get from exposure page
+    // let sampleData = { "GBP": 1000, "MXN": 500, "EUR": 2000, "JPY": 1000, "CNY": 600, "PHP": 500, "BRL": 200, "DDD": 500 };
+    let sampleData = "{% for each in results %}{{ each[1] }}:{{ each[2] }},{% endfor %}".split(',').slice(0, -3)
+        .map(r => r.split(':'))
+        .reduce((result, item) => {
+            result[item[0]] = Number(item[1])
+            return result
+        }, {})
+
+    // make chart data from sample data
+    function makeChartData(sampleData) {
+        let res = [];
+        Object.keys(sampleData).forEach(function (key) {
+            if (codeToCountry[key]) {
+                let countries = codeToCountry[key];
+                // console.log(countries);
+                countries.forEach(function (country) {
+                    let tmp = {};
+                    tmp['code'] = country;
+                    tmp['value'] = sampleData[key];
+                    tmp['name'] = country;
+                    console.log(tmp);
+                    res.push(tmp);
+                })
+            }
+        })
+        return res;
+    }
+
+    let data = makeChartData(sampleData);
+
+    // draw highchart map
+    Highcharts.mapChart('heatmap', {
+        chart: {
+            map: 'custom/world',
+            backgroundColor: '#fff9f9',
+        },
+
+        colors: ['rgba(19,64,117,0.05)', 'rgba(19,64,117,0.2)', 'rgba(19,64,117,0.4)',
+            'rgba(19,64,117,0.5)', 'rgba(19,64,117,0.6)', 'rgba(19,64,117,0.8)', 'rgba(19,64,117,1)'],
+
+        title: {
+            text: 'Exposure Heatmap'
+        },
+        mapNavigation: {
+            enabled: true
+        },
+        legend: {
+            title: {
+                text: 'Currency Conversion',
+                style: {
+                    color: ( // theme
+                        Highcharts.defaultOptions &&
+                        Highcharts.defaultOptions.legend &&
+                        Highcharts.defaultOptions.legend.title &&
+                        Highcharts.defaultOptions.legend.title.style &&
+                        Highcharts.defaultOptions.legend.title.style.color
+                    ) || 'black'
+                }
+            },
+            align: 'left',
+            verticalAlign: 'bottom',
+            floating: true,
+            layout: 'vertical',
+            valueDecimals: 0,
+            backgroundColor: '#fff9f9',
+            symbolRadius: 0,
+            symbolHeight: 14
+        },
+
+        colorAxis: {
+            dataClasses: [{
+                to: 100
+            }, {
+                from: 100,
+                to: 300
+            }, {
+                from: 300,
+                to: 500
+            }, {
+                from: 500,
+                to: 800
+            }, {
+                from: 800,
+                to: 1000
+            }, {
+                from: 1000,
+                to: 2000
+            }, {
+                from: 2000
+            }]
+        },
+
+        series: [{
+            data: data,
+            joinBy: ['iso-a3', 'code'],
+            animation: true,
+            shadow: false
+        }]
+    });
+
+</script>
+{% endblock %}

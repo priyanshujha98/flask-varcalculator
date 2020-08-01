@@ -1,0 +1,73 @@
+{% extends 'base_page.html' %}
+
+{% block content %}
+<div class="step active" id="step1">
+  <h4 class="mx-2">Risk Minimiser - Trade Tool Suggestion</h4>
+  <div class="row">
+    <div class="col-4">
+      <div class="card element-border mx-2 p-2 text-center">
+        Current VaR
+        <h4>{{ current_var }}</h4>
+      </div>
+    </div>
+  </div>
+  <div class="mr-3 mb-3 border border-theme bg-white rounded-pill float-right row">
+    {% for i in range(total_scenarios) %}
+      <a href="{{ url_for('suggestion_tool_page', report_id=report_id, scenario=i+1) if scenario != i+1 else '#' }}"
+        class="img-icon {{ 'col-%i rounded-pill bg-theme text-white'%(14-total_scenarios*2) if scenario == i+1 else 'col-2 text-theme' }}">
+        <strong>{{ "Scenario " if scenario == i+1 else "" }}{{i+1}}</strong>
+      </a>
+    {% endfor %}
+  </div>
+  
+  <div class="form-wrapper">
+    <div class="exposure-table">
+      <table id="exposure-table" class="full">
+        <thead>
+          <tr>
+            <td>Buy</td>
+            <td>Sell</td>
+            <td>Amount</td>
+            <td>Tenor</td>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in scenarios[scenario-1] %}
+          <tr>
+            {% for cell in row %}
+            <td class="text-center py-3"><strong>{{ cell }}</strong></td>
+            {% endfor %}
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <br />
+      <div class="container fluid">
+        <div class="row full my-2">
+          <div class="col-9">Current VaR</div>
+          <div class="col-3 text-right">
+            <strong>{{ current_var }}</strong>
+          </div>
+        </div>
+        <div class="row full my-2">
+          <div class="col-9">Scenario {{ scenario }} VaR Reduction</div>
+          <div class="col-3 text-right text-theme">
+            <strong>{{ var_reductions[scenario-1] }}</strong>
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div class="row full my-2">
+          <div class="col-9">VaR after Scenario {{ scenario }}</div>
+          <div class="col-3 text-right">
+            <strong>{{ diffs[scenario-1] }}</strong>
+          </div>
+        </div>
+      </div>
+      <br /><br />
+      <a href="#" class="btn btn-brown btn-outline full">
+        Compare Rates
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}
