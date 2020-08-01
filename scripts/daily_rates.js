@@ -21,22 +21,61 @@ async function performRequest(options) {
 }
 
 function getDateString(date) {
-  return `${date.getFullYear()}-${date.getMonth()+1}-${date.getDate()}`
+  // const month = `0${date.getMonth() + 1}`.slice(-2)
+  // const d = `0${date.getDate()}`.slice(-2)
+  const month = date.getMonth() + 1
+  const d = date.getMonth() + 1
+  
+  return `${date.getFullYear()}-${month}-${d}`
 }
 
 async function getRates(date) {
-  return await performRequest({
-    hostname: 'api.ratesapi.io',
-    path: `/api/${getDateString(date)}?base=USD`,
-    method: 'GET',
-    agent: false,
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    maxRedirects: 20
-  })
-    .then(res => JSON.parse(res))
+  try {
+    return await performRequest({
+      hostname: 'api.ratesapi.io',
+      path: `/api/${getDateString(date)}?base=USD`,
+      method: 'GET',
+      agent: false,
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      timeout: 3000,
+      rejectUnauthorized: false,
+      maxRedirects: 20
+    })
+      .then(res => JSON.parse(res))
+  } catch(e) {
+    console.error(e)
+  }
 }
+
+// async function getRawRates(date) {
+//   return await performRequest({
+//     hostname: 'v2.api.forex',
+//     path: `/historics/${getDateString(date)}.json?from=USD&key=demo`,
+//     method: 'GET',
+//     maxRedirects: 20,
+//   })
+// }
+
+// async function getRates(date) {
+//   try {
+//     const data = await getRawRates(date)
+//     const parsedRates = {};
+//     Object.keys(data['rates_histo'])
+//       .forEach(k => {
+//         parsedRates[k] = data['rates_histo'][k]['close']
+//       })
+
+//     return {
+//       rates: parsedRates
+//     }
+//   } catch(e) {
+//     console.error('error', e)
+//   }
+  
+//   return { rates: {} }
+// }
 
 function nDaysAgo(n) {
   let d = new Date();
@@ -45,20 +84,25 @@ function nDaysAgo(n) {
 }
 
 function range(n) {
-  return (new Array(n)).fill(0).map((x, i) => i)
+  return (new Array(n+1)).fill(0).map((x, i) => i).filter(x => x)
 }
 
 async function getRatesData() {
   return await Promise.all(
-    range(1095).reverse().map(i => nDaysAgo(i)).map(d => getRates(d))
+    range(2190).reverse().map(i => nDaysAgo(i)).map(d => getRates(d))
   )
 }
 
 async function main() {
-  const data = await getRatesData()
-  return fs.writeFileSync('data.json', JSON.stringify(data))
+  try {
+    const data = await getRatesData()
+    return fs.writeFileSync('data.json', JSON.stringify(data))
+  } catch(e) {
+    console.log('error', e)
+  }
+  return
 }
 
 main()
 
-// getRates(new Date()).then(console.log)
+// getRates(nDaysAgo(100)).then(console.log)
