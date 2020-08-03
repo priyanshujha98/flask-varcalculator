@@ -17,6 +17,9 @@ with open("data.json") as f:
 def get_prices(c1, c2):
   return list(map(lambda row: row['rates'][c2]/row['rates'][c1], raw_data))
 
+def get_zscore(confidence):
+  return stats.norm.ppf(confidence)
+
 def get_n_day_returns(c1, c2, n):
   rates = get_prices(c1, c2)
   diffs = [(rates[i+n]-rates[i])/rates[i] for i in range(0, len(rates)-n, n)]
@@ -29,10 +32,16 @@ def get_n_day_portfolio_returns(pairs, n):
   ]
   return [sum((np.array(r)*w).tolist()) for r, w in zip(pairs_returns, weights)]
 
+# def get_var(returns, confidence):
+#   sorted_returns = sorted(returns)
+#   index = int(len(sorted_returns)*(1-confidence))+1
+#   return sorted_returns[index]
+
 def get_var(returns, confidence):
-  sorted_returns = sorted(returns)
-  index = int(len(sorted_returns)*(1-confidence))+1
-  return sorted_returns[index]
+  variance = np.var(returns)
+  stddev = sqrt(variance)
+  zscore = get_zscore(confidence)
+  return zscore * stddev
 
 def get_n_day_individual_vars(pairs, n, confidence):
   return list(map(
@@ -48,9 +57,6 @@ def get_portfolio_variance(pairs, n):
   weights, _ = weightify([p[2] for p in pairs])
   cov_matrix = get_covariance_matrix(pairs, n)
   return np.dot(np.array(weights), np.dot(cov_matrix, np.array(weights).T))
-
-def get_zscore(confidence):
-  return stats.norm.ppf(confidence)
 
 def get_portfolio_var(pairs, n, confidence):
   if len(pairs) == 1:
