@@ -53,6 +53,9 @@ def get_zscore(confidence):
   return stats.norm.ppf(confidence)
 
 def get_portfolio_var(pairs, n, confidence):
+  if len(pairs) == 1:
+    return get_n_day_individual_vars(pairs, n, confidence)[0]
+  
   variance = get_portfolio_variance(pairs, n)
   stddev = sqrt(variance)
   zscore = get_zscore(confidence)
@@ -70,6 +73,8 @@ def get_betas(pairs, n):
   return [ c/variance for c in covariances ]
 
 def get_n_day_component_vars(pairs, n, confidence):
+  if len(pairs) == 1:
+    return get_n_day_individual_vars(pairs, n, confidence)
   betas = get_betas(pairs, n)
   portfolio_var = get_portfolio_var(pairs, n, confidence)
   weights, _ = weightify([p[2] for p in pairs ])
