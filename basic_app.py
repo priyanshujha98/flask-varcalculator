@@ -369,11 +369,11 @@ def handle_report(form, files, report_id, user_id):
         "100%",
     )]
     benefit_abs = round((
-        abs(sum(var.get_n_day_individual_vars(pairs, n, confidence))) - var.get_portfolio_var(pairs, 7, confidence)),
+        abs(sum(var.get_n_day_individual_vars(pairs, n, confidence))) - var.get_portfolio_var(pairs, n, confidence)),
         0
     )
     benefit_percent = round((
-        abs(sum(var.get_n_day_individual_vars(pairs, n, confidence))) - var.get_portfolio_var(pairs, 7, confidence)),
+        abs(sum(var.get_n_day_individual_vars(pairs, n, confidence))) - var.get_portfolio_var(pairs, n, confidence)),
         0
     )
 
