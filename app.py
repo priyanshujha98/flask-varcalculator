@@ -6,6 +6,7 @@
 
 from datetime import datetime
 from flask import Flask, current_app, request, redirect, render_template_string, render_template
+from flask_login import login_user
 from flask_babelex import Babel
 from flask_sqlalchemy import SQLAlchemy
 from flask_user import current_user, login_required, roles_required, UserManager, UserMixin
@@ -202,16 +203,19 @@ class CustomUserManager(UserManager):
 
         if request.method != 'POST':
             return render_template('login.html')
+
+        # if not login_form.validate():
+        #     print('Invalid form')
+        #     return render_template('login.html', attempt_failed=True)
         
         # Retrieve User
-        user = None
-        if self.USER_ENABLE_EMAIL:
-            # Find user by email (with form.email)
-            user, _ = self.db_manager.get_user_and_user_email_by_email(
-                login_form.email.data)
-        if user:
+        # Find user by email (with form.email)
+        user, _ = self.db_manager.get_user_and_user_email_by_email(login_form.email.data)
+        if user and self.verify_password(login_form.password.data, user.password):
             safe_next_url = self.make_safe_url(login_form.next.data)
             return self._do_login_user(user, safe_next_url, True)
+        
+        return render_template('login.html', attempt_failed=True)
         
 
     def register_view(self):
@@ -219,22 +223,24 @@ class CustomUserManager(UserManager):
 
         # Immediately redirect already logged in users
         if self.call_or_get(current_user.is_authenticated) and self.USER_AUTO_LOGIN_AT_LOGIN:
-            return redirect(safe_reg_next)
+            return self._do_login_user(current_user, safe_reg_next, True)
 
         # Initialize form
         register_form = self.RegisterFormClass(request.form)
         page_number = request.args.get('p') or 1
 
         if request.method == 'POST':
-            user = self.db_manager.add_user()
-            register_form.populate_obj(user)
-            user_email = self.db_manager.add_user_email(
-                user=user, is_primary=True)
-            register_form.populate_obj(user_email)
-            user.password = self.hash_password(user.password)
-
-            self.db_manager.save_user_and_user_email(user, user_email)
-            self.db_manager.commit()
+            user_email = request.form.getlist('email').pop()
+            user_password = request.form.getlist('password').pop()
+            hashed_password = self.hash_password(user_password)
+            user = User(
+                email=user_email,
+                email_confirmed_at=datetime.utcnow(),
+                password=hashed_password,
+            )
+            db.session.add(user)
+            db.session.commit()
+            db.session.flush()
             add_detail(user.id, {
                 'first_name': request.form.getlist('first_name').pop(),
                 'last_name': request.form.getlist('last_name').pop(),
@@ -272,10 +278,12 @@ if not User.query.filter(User.email == 'member@example.com').first():
 
 # Create 'admin@example.com' user with 'Admin' and 'Agent' roles
 if not User.query.filter(User.email == 'admin@example.com').first():
+    user_password = user_manager.hash_password('Password1')
+    print(user_password)
     user = User(
         email='admin@example.com',
         email_confirmed_at=datetime.utcnow(),
-        password=user_manager.hash_password('Password1'),
+        password=user_password,
     )
     user.roles.append(Role(name='Admin'))
     user.roles.append(Role(name='Agent'))
@@ -372,8 +380,8 @@ def handle_report(form, files, report_id, user_id):
         abs(sum(var.get_n_day_individual_vars(pairs, n, confidence))) - var.get_portfolio_var(pairs, n, confidence)),
         0
     )
-    benefit_percent = round((
-        (abs(sum(var.get_n_day_individual_vars(pairs, n, confidence))) - var.get_portfolio_var(pairs, n, confidence)))/var.get_portfolio_var(pairs, n, confidence),
+    benefit_percent = round(
+        ((abs(sum(var.get_n_day_individual_vars(pairs, n, confidence))) - var.get_portfolio_var(pairs, n, confidence)))/var.get_n_day_individual_vars(pairs, n, confidence),
         0
     )
 
@@ -514,7 +522,7 @@ def add_routes():
         return render_template('./register.html')
     
     @app.route('/payment')
-    # @login_required
+    @login_required
     def payment_page():
         PP_CLIENT_ID = "AQnE3_uZrT1Vf56AluXZIR1ir4gUYWAMmxquNRnRzGSVukHeGPzUvu5WsW4FtdYhqrHO06IQkKTr8zOh"
         user = User.query.filter_by(email=current_user.email).first()
@@ -535,6 +543,7 @@ def add_routes():
         return redirect('/enter-exposure')
 
     @app.route('/enter-exposure')
+    @login_required
     def enter_exposure_page():
         return render_template('./exposures.html', currencies=CURRENCIES)
 
@@ -554,6 +563,7 @@ def add_routes():
         )
 
     @app.route('/suggestion-tool')
+    @login_required
     def suggestion_tool_page():
         user = User.query.filter_by(email=current_user.email).first()
         reports = Report.query.filter_by(user_id=user.id).all()
@@ -584,6 +594,7 @@ def add_routes():
         )
 
     @app.route('/contact')
+    @login_required
     def contact_page():        
         return render_template(
             './contact.html'            
@@ -597,4 +608,5 @@ def add_routes():
 if __name__ == '__main__':
     # Setup Flask Server Routes
     add_routes()
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    # app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run()
